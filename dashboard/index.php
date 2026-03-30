@@ -11,8 +11,19 @@ include "../config/koneksi_s_login.php";
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Portarum</title>
-
+  <script src="../assets/js/ckeditor.js"></script>
+  <link rel="stylesheet" href="../assets/css/sweetalert.min.css">
   <link rel="stylesheet" href="../assets/css/bootstrap-5-3-2.css">
+
+  <script src="../assets/js/jquery.min.js"></script>
+  <script src="../assets/js/sweetalert.min.js"></script>
+  <script src="../assets/js/bootstrap-5-3-2.js"></script>
+
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css">
+
+  <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+  <link rel="stylesheet" href="../assets/css/select2.min.css">
+  <script src="../assets/js/select2.min.js"></script>
   <style>
     body {
       background: #f8f9fa;
@@ -37,6 +48,56 @@ include "../config/koneksi_s_login.php";
       position: sticky;
       top: var(--navbar-height);
     }
+
+    .select2-container .select2-selection--single {
+      height: 38px;
+      border: 1px solid #ced4da;
+      border-radius: 0.375rem;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+      line-height: 38px;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+      height: 38px;
+    }
+
+    /* hilangkan semua border */
+table.dataTable,
+table.dataTable th,
+table.dataTable td {
+    border: none !important;
+}
+
+/* header lebih soft */
+table.dataTable thead {
+    color: #6c757d;
+    font-size: 14px;
+}
+
+/* row clean + hover halus */
+table.dataTable tbody tr {
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+table.dataTable tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+/* kasih jarak antar row biar airy */
+table.dataTable tbody td {
+    padding: 12px 8px;
+}
+
+/* search biar simple */
+.dataTables_filter input {
+    border: none;
+    border-bottom: 1px solid #ddd;
+    border-radius: 0;
+    outline: none;
+}
   </style>
 </head>
 
@@ -61,10 +122,6 @@ include "../config/koneksi_s_login.php";
             <a class="nav-link" href="?page=read&action=search">Search</a>
           </li>
 
-          <li class="nav-item">
-            <a class="nav-link" href="?page=create&action=write">Write</a>
-          </li>
-
           <!-- USER DROPDOWN -->
           <li class="nav-item dropdown">
             <a href="#" class="d-flex align-items-center nav-link dropdown-toggle" data-bs-toggle="dropdown">
@@ -82,6 +139,8 @@ include "../config/koneksi_s_login.php";
               </li>
               <li><a class="dropdown-item" href="#">Profile</a></li>
               <li><a class="dropdown-item" href="#">Settings</a></li>
+              <li><a class="dropdown-item" href="?page=create&action=write">Write</a></li>
+              <li><a class="dropdown-item" href="?page=setting&action=library">Library</a></li>
               <li>
                 <hr class="dropdown-divider">
               </li>
@@ -117,48 +176,58 @@ include "../config/koneksi_s_login.php";
 
 
   <!-- Berita Terpopuler -->
-  <?php
-  switch (@$_GET['page']) {
-    case "home":
-      include "./view/home.php";
-      break;
-    case "create":
-      switch (@$_GET['action']) {
-        case "write":
-          include "./create/write.php";
-          break;
-        default:
-          include "./view/home.php";
-      }
-      break;
-    case "read":
-      switch (@$_GET['action']) {
-        case "search":
-          include "./view/read/search.php";
-          break;
-          case "read":
-          include "./view/read/read.php";
-          break;
-        default:
-          include "./view/home.php";
-      }
-      break;
-      case "setting":
-      switch (@$_GET['action']) {
-        case "library":
-          include "./view/setting/library.php";
-          break;
-          case "profile":
-          include "./view/setting/profile.php";
-          break;
-        default:
-          include "./view/home.php";
-      }
-      break;
-    default:
-      include "./view/home.php";
-  } ?>
+  <div class="container my-5">
+    <div class="row">
+      <?php
 
+      switch (@$_GET['page']) {
+        case "home":
+          include "./view/home.php";
+          break;
+        case "create":
+          switch (@$_GET['action']) {
+            case "write":
+              $showSidebar = true;
+              include "./view/layout/sidebar.php";
+              include "./create/write.php";
+              break;
+            default:
+              include "./view/home.php";
+          }
+          break;
+        case "read":
+          switch (@$_GET['action']) {
+            case "search":
+              include "./view/read/search.php";
+              break;
+            case "readarticle":
+              include "./view/read/readarticle.php";
+              break;
+            default:
+              include "./view/home.php";
+          }
+          break;
+        case "setting":
+          switch (@$_GET['action']) {
+            case "library":
+              $showSidebar = true;
+              include "./view/layout/sidebar.php";
+              include "./view/setting/library.php";
+              break;
+            case "profile":
+              $showSidebar = true;
+              include "./view/layout/sidebar.php";
+              include "./view/setting/profile.php";
+              break;
+            default:
+              include "./view/home.php";
+          }
+          break;
+        default:
+          include "./view/home.php";
+      } ?>
+    </div>
+  </div>
   <!-- Rekomendasi -->
   <!-- <div class="container my-5">
     <div class="d-flex justify-content-between align-items-center mb-3">
@@ -241,7 +310,27 @@ include "../config/koneksi_s_login.php";
   -->
 
 
-  <script src="../assets/js/bootstrap-5-3-2.js"></script>
+  <script>
+    $(document).ready(function() {
+      $('#category').select2({
+        placeholder: "Pilih Category",
+        width: '100%'
+      });
+    });
+
+
+
+    $(document).ready(function() {
+      $('#myTable').DataTable({
+        paging: true,
+        pageLength: 10,
+        lengthMenu: [10, 25, 50],
+        searching: true,
+        ordering: true,
+        info: false
+      });
+    });
+  </script>
 </body>
 
 </html>
