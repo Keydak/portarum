@@ -14,18 +14,16 @@
                     <a href="?page=create&action=write">Write</a>
                 </li>
                 <li class="list-group-item">
-                    <a href="?page=setting&action=library">Library</a>
+                    <a href="?page=setting&action=library">Dashboard</a>
                 </li>
                 <li class="list-group-item">
                     <a href="?page=setting&action=profile">Profile</a>
                 </li>
 
-                <li class="list-group-item">
-                    <a href="?page=home">Dashboard</a>
-                </li>
+    
 
-                <li class="list-group-item">
-                    Logout
+                <li class="list-group-item" >
+                  <a style="color: red; text-decoration: none;" href="../../logout.php">Logout</a>
                 </li>
 
             </ul>

@@ -84,7 +84,7 @@ if (isset($_GET['id'])) {
             </div>
 
             <div class="mb-3">
-                <label class="form-label">Category</label>
+                <label class="form-label">Kategori</label>
                 <select name="category" id="category" required class="form-select">
                     <?php
                     $stmt_category = $conn->prepare("SELECT * FROM category");
@@ -111,11 +111,36 @@ if (isset($_GET['id'])) {
 
 
 <script>
-    ClassicEditor
-        .create(document.querySelector('#editor'))
-        .catch(error => {
-            console.error(error);
-        });
+var editor = new EasyMDE({
+  element: document.getElementById("editor"),
+  scrollbarStyle: 'native', 
+  maxHeight: '700px', 
+
+   toolbar: [
+    "bold",
+    "italic",
+    "heading",
+    "|",
+    "code",
+    "quote",
+    "|",
+    "unordered-list",
+    "ordered-list",
+    "|",
+    "link",
+    "image",
+    "horizontal-rule",
+    "|",
+    "preview",
+
+  ],
+  shortcuts: {
+    toggleSideBySide: null,   // F9
+    toggleFullScreen: null,   // F11
+    togglePreview: null,      // Ctrl+P
+  }
+});
+
 </script>
 
 <?php
@@ -124,7 +149,7 @@ if (isset($_POST['Update'])) {
 
 
     $title = htmlspecialchars(isset($_POST['title']) ? $_POST['title'] : '');
-    $content = htmlspecialchars(isset($_POST['content']) ? $_POST['content'] : '');
+    $content = (isset($_POST['content']) ? $_POST['content'] : '');
     $status = htmlspecialchars(isset($_POST['status']) ? $_POST['status'] : '');
     $category = htmlspecialchars(isset($_POST['category']) ? $_POST['category'] : '');
 

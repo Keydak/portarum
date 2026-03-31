@@ -1,5 +1,18 @@
 <?php
 include "../config/koneksi_s_login.php";
+include "../config/parsedown.php";
+$Parsedown = new Parsedown();
+$Parsedown->setSafeMode(true);
+
+$user_id = mysqli_real_escape_string($conn, $_SESSION['id']);
+
+$stmt_user = $conn->prepare("SELECT username,nama,photo FROM profile WHERE UUID = ?");
+$stmt_user->bind_param("s", ($user_id));
+$stmt_user->execute();
+$result_user = $stmt_user->get_result();
+$row_user = $result_user->fetch_assoc();
+
+
 
 
 ?>
@@ -11,12 +24,14 @@ include "../config/koneksi_s_login.php";
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Portarum</title>
-  <script src="../assets/js/ckeditor.js"></script>
+
+  <link rel="stylesheet" href="../assets/css/easymde.min.css">
   <link rel="stylesheet" href="../assets/css/sweetalert.min.css">
   <link rel="stylesheet" href="../assets/css/bootstrap-5-3-2.css">
 
   <script src="../assets/js/jquery.min.js"></script>
   <script src="../assets/js/sweetalert.min.js"></script>
+  <script src="../assets/js/easymde.min.js"></script>
   <script src="../assets/js/bootstrap-5-3-2.js"></script>
 
   <link rel="stylesheet" href="../assets/css/datatables.min.css">
@@ -63,41 +78,74 @@ include "../config/koneksi_s_login.php";
       height: 38px;
     }
 
-    /* hilangkan semua border */
-table.dataTable,
-table.dataTable th,
-table.dataTable td {
-    border: none !important;
-}
+    .article-content {
+      font-size: 18px;
+      line-height: 1.8;
+    }
 
-/* header lebih soft */
-table.dataTable thead {
-    color: #6c757d;
-    font-size: 14px;
-}
+    .article-content h4 {
+      margin-top: 30px;
+    }
 
-/* row clean + hover halus */
-table.dataTable tbody tr {
-    border-radius: 8px;
-    transition: all 0.2s ease;
-}
+    .article-content p {
+      margin-bottom: 16px;
+    }
 
-table.dataTable tbody tr:hover {
-    background-color: #f8f9fa;
-}
+    .article-content {
+      font-size: 18px;
+      line-height: 1.8;
+    }
 
-/* kasih jarak antar row biar airy */
-table.dataTable tbody td {
-    padding: 12px 8px;
-}
+    .article-content h1,
+    .article-content h2,
+    .article-content h3 {
+      margin-top: 30px;
+      font-weight: bold;
+    }
 
-/* search biar simple */
-.dataTables_filter input {
-    border: none;
-    border-bottom: 1px solid #ddd;
-    border-radius: 0;
-    outline: none;
-}
+    .article-content pre {
+      color: #000000;
+      padding: 12px;
+      border-radius: 6px;
+      overflow-x: auto;
+    }
+
+    .article-content code {
+      background: #eee;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    table.dataTable,
+    table.dataTable th,
+    table.dataTable td {
+      border: none !important;
+    }
+
+    table.dataTable thead {
+      color: #6c757d;
+      font-size: 14px;
+    }
+
+    table.dataTable tbody tr {
+      border-radius: 8px;
+      transition: all 0.2s ease;
+    }
+
+    table.dataTable tbody tr:hover {
+      background-color: #f8f9fa;
+    }
+
+    table.dataTable tbody td {
+      padding: 12px 8px;
+    }
+
+    .dataTables_filter input {
+      border: none;
+      border-bottom: 1px solid #ddd;
+      border-radius: 0;
+      outline: none;
+    }
   </style>
 </head>
 
@@ -126,21 +174,20 @@ table.dataTable tbody td {
           <li class="nav-item dropdown">
             <a href="#" class="d-flex align-items-center nav-link dropdown-toggle" data-bs-toggle="dropdown">
 
-              <img src="https://i.pravatar.cc/40"
+              <img src="../assets/image/profile/<?= htmlspecialchars($row_user['photo']) ?>"
                 class="rounded-circle me-2"
-                width="32" height="32">
+                width="32" height="32" style="object-fit: cover;">
 
-              <span class="fw-semibold">John Doe</span>
+              <span class="fw-semibold"><?= $row_user['username'] ?></span>
             </a>
 
             <ul class="dropdown-menu dropdown-menu-end shadow-sm">
               <li>
                 <h6 class="dropdown-header">Akun</h6>
               </li>
-              <li><a class="dropdown-item" href="#">Profile</a></li>
-              <li><a class="dropdown-item" href="#">Settings</a></li>
+              <li><a class="dropdown-item" href="?page=setting&action=profile">Profile</a></li>
               <li><a class="dropdown-item" href="?page=create&action=write">Write</a></li>
-              <li><a class="dropdown-item" href="?page=setting&action=library">Library</a></li>
+              <li><a class="dropdown-item" href="?page=setting&action=library">Dashboard</a></li>
               <li>
                 <hr class="dropdown-divider">
               </li>
@@ -153,31 +200,9 @@ table.dataTable tbody td {
     </div>
   </nav>
 
-  <!-- Hero Section -->
-  <!-- <div class="container my-4">
-    <div class="row align-items-center">
-      <div class="col-md-6">
-        <small class="text-primary">Headline</small>
-        <h2 class="fw-bold mt-2">
-          Apa Itu Cancel Culture, Fenomena Sosial yang Kontroversial
-        </h2>
-        <p class="text-muted">
-          Cancel culture adalah praktik sosial saat seseorang diboikot karena perilaku atau ucapan kontroversial.
-        </p>
-        <small class="text-muted">18 Februari 2025</small><br>
-        <a href="#" class="text-primary text-decoration-none">Baca Selengkapnya →</a>
-      </div>
-      <div class="col-md-6">
-        <img src="https://via.placeholder.com/600x300" class="w-100 hero-img">
-      </div>
-    </div>
-  </div> -->
-
-
-
   <!-- Berita Terpopuler -->
   <div class="container my-5">
-    <div class="row">
+    <div class="row <?php echo isset($_GET['page']) && $_GET['page'] === 'read' && isset($_GET['action']) && $_GET['action'] === 'readarticle' ? 'justify-content-center' : ''; ?>">
       <?php
 
       switch (@$_GET['page']) {
@@ -194,7 +219,7 @@ table.dataTable tbody td {
               include "./view/home.php";
           }
           break;
-           case "update":
+        case "update":
           switch (@$_GET['action']) {
             case "edit_blog":
               include "./view/layout/sidebar.php";
@@ -210,7 +235,10 @@ table.dataTable tbody td {
               include "./view/read/search.php";
               break;
             case "readarticle":
-              include "./view/read/readarticle.php";
+              include "./view/read/read.php";
+              break;
+            case "profile":
+              include "./view/read/other_profile.php";
               break;
             default:
               include "./view/home.php";

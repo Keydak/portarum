@@ -37,9 +37,9 @@
             </div>
 
             <div class="mb-3">
-                <label class="form-label">Category</label>
+                <label class="form-label">Kategori</label>
                 <select name="category" id="category" required class="form-select">
-                    <option hidden disabled selected>Pilih Category</option>
+                    <option hidden disabled selected>Pilih Kategori</option>
                     <?php
                     $stmt_category = $conn->prepare("SELECT * FROM category");
                     $stmt_category->execute();
@@ -65,11 +65,34 @@
 
 
 <script>
-    ClassicEditor
-        .create(document.querySelector('#editor'))
-        .catch(error => {
-            console.error(error);
-        });
+var editor = new EasyMDE({
+  element: document.getElementById("editor"),
+ scrollbarStyle: 'native', 
+  maxHeight: '700px', 
+   toolbar: [
+    "bold",
+    "italic",
+    "heading",
+    "|",
+    "code",
+    "quote",
+    "|",
+    "unordered-list",
+    "ordered-list",
+    "|",
+    "link",
+    "image",
+    "horizontal-rule",
+    "|",
+    "preview",
+
+  ],
+  shortcuts: {
+    toggleSideBySide: null,   // F9
+    toggleFullScreen: null,   // F11
+    togglePreview: null,      // Ctrl+P
+  }
+});
 </script>
 
 <?php
@@ -84,7 +107,7 @@ if (isset($_POST['create'])) {
     $result_id = $stmt_id->get_result();
 
     $title = htmlspecialchars( isset($_POST['title']) ? $_POST['title'] : '');
-    $content = htmlspecialchars( isset($_POST['content']) ? $_POST['content'] : '');
+    $content = ( isset($_POST['content']) ? $_POST['content'] : '');
     $status = htmlspecialchars( isset($_POST['status']) ? $_POST['status'] : '');
     $category = htmlspecialchars( isset($_POST['category']) ? $_POST['category'] : '');
 
@@ -124,7 +147,7 @@ if (isset($_POST['create'])) {
                 if ($ukuran < 2097152) {
                     $hashed_file_name = "tb-" . substr(date("dmyhis"), 0, 35) . '.' . $ekstensi;
 
-                    $stmt_insert = $conn->prepare('INSERT INTO article (UUID,thumbnail,title,content,status,is_takedown,created_at,id_profile,category_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)');
+                    $stmt_insert = $conn->prepare('INSERT INTO article (UUID,thumbnail,title,content,status,is_takedown,created_at,id_profile,category_id,views) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0)');
                     $stmt_insert->bind_param('sssssssss', $uuid, $hashed_file_name, $title, $content, $status, $no, $tgl_upload, $row['id_profile'], $category);
 
                     if ($stmt_insert->execute()) {
