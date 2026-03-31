@@ -1,8 +1,14 @@
+<?php if (!isset($_SESSION["id"])){ ?>
+   <script>
+    window.location.href = "../../index.php";
+   </script>
+<?php } ?>
+
 <!-- Main Content -->
 <div class="col-md-9">
 
     <div class="write-card">
-        <h4 class="write-title">✍️ Write New Blog</h4>
+        <h4 class="write-title">Buat Blog Baru</h4>
 
         <form method="POST" enctype="multipart/form-data">
             <div class="mb-3">
@@ -77,10 +83,10 @@ if (isset($_POST['create'])) {
     $stmt_id->execute();
     $result_id = $stmt_id->get_result();
 
-    $title = mysqli_real_escape_string($conn, isset($_POST['title']) ? $_POST['title'] : '');
-    $content = mysqli_real_escape_string($conn, isset($_POST['content']) ? $_POST['content'] : '');
-    $status = mysqli_real_escape_string($conn, isset($_POST['status']) ? $_POST['status'] : '');
-    $category = mysqli_real_escape_string($conn, isset($_POST['category']) ? $_POST['category'] : '');
+    $title = htmlspecialchars( isset($_POST['title']) ? $_POST['title'] : '');
+    $content = htmlspecialchars( isset($_POST['content']) ? $_POST['content'] : '');
+    $status = htmlspecialchars( isset($_POST['status']) ? $_POST['status'] : '');
+    $category = htmlspecialchars( isset($_POST['category']) ? $_POST['category'] : '');
 
 
     $ekstensi_diperbolehkan = array('jpg', 'jpeg', 'png', 'webp');

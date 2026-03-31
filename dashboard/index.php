@@ -19,9 +19,9 @@ include "../config/koneksi_s_login.php";
   <script src="../assets/js/sweetalert.min.js"></script>
   <script src="../assets/js/bootstrap-5-3-2.js"></script>
 
-  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css">
+  <link rel="stylesheet" href="../assets/css/datatables.min.css">
+  <script src="../assets/js/datatables.min.js"></script>
 
-  <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
   <link rel="stylesheet" href="../assets/css/select2.min.css">
   <script src="../assets/js/select2.min.js"></script>
   <style>
@@ -144,7 +144,7 @@ table.dataTable tbody td {
               <li>
                 <hr class="dropdown-divider">
               </li>
-              <li><a class="dropdown-item text-danger" href="#">Logout</a></li>
+              <li><a class="dropdown-item text-danger" href="./logout.php">Logout</a></li>
             </ul>
           </li>
 
@@ -187,9 +187,18 @@ table.dataTable tbody td {
         case "create":
           switch (@$_GET['action']) {
             case "write":
-              $showSidebar = true;
               include "./view/layout/sidebar.php";
               include "./create/write.php";
+              break;
+            default:
+              include "./view/home.php";
+          }
+          break;
+           case "update":
+          switch (@$_GET['action']) {
+            case "edit_blog":
+              include "./view/layout/sidebar.php";
+              include "./update/write_update.php";
               break;
             default:
               include "./view/home.php";
@@ -210,12 +219,10 @@ table.dataTable tbody td {
         case "setting":
           switch (@$_GET['action']) {
             case "library":
-              $showSidebar = true;
               include "./view/layout/sidebar.php";
               include "./view/setting/library.php";
               break;
             case "profile":
-              $showSidebar = true;
               include "./view/layout/sidebar.php";
               include "./view/setting/profile.php";
               break;

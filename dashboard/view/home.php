@@ -1,3 +1,9 @@
+<?php if (!isset($_SESSION["id"])){ ?>
+   <script>
+    window.location.href = "../index.php";
+   </script>
+<?php } ?>
+
 <!-- LEFT: Berita -->
 <div class="col-lg-8 border-end">
 

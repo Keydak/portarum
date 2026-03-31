@@ -1,3 +1,16 @@
+<?php if (!isset($_SESSION["id"])){ ?>
+   <script>
+    window.location.href = "../../index.php";
+   </script>
+<?php } ?>
+
+<?php
+$stmt_tables = $conn->prepare("SELECT thumbnail,title,content,is_takedown,status,a.created_at,c.nama,a.UUID FROM article a JOIN profile p JOIN category c ON a.id_profile = p.id_profile AND a.category_id = c.category_id WHERE p.UUID = ?");
+  $stmt_tables->bind_param("s", $_SESSION["id"]);
+  $stmt_tables->execute();
+  $result_tables = $stmt_tables->get_result();
+
+?>
 <!-- Main Content -->
 <div class="col-md-9">
 
@@ -33,7 +46,7 @@
                 <tr>
                     <th>Title</th>
                     <th>Category</th>
-                    <th>Image</th>
+                    <th>Thumbnail</th>
                     <th>Status</th>
                     <th>Published</th>
                     <th>Actions</th>
@@ -41,7 +54,21 @@
             </thead>
             <tbody>
             <?php
-            
+            foreach ($result_tables as $row) {?>
+                <tr>
+                    <td><?= $row["title"] ?></td>
+                    <td><?= $row["nama"] ?></td>
+                    <td><img src="./../assets/image/thumbnail/<?= $row["thumbnail"] ?>" alt="Thumbnail" width="100"></td>
+                    <td><?= $row["status"] ?> <p style="color: red;"><?= $row['is_takedown'] == 'YES' ? '(Takedown)' : '' ?></p></td>
+                    <td><?= formatTanggal($row["created_at"]) ?></td>
+                    <td>
+                        <a href="?page=read&action=view&id=<?= $row["UUID"] ?>" class="btn btn-sm btn-primary">View</a>
+                        <a href="?page=update&action=edit_blog&id=<?= $row["UUID"] ?>" class="btn btn-sm btn-warning">Edit</a>
+                        <a href="?page=setting&action=library&delete_id=<?= $row["UUID"] ?>" class="btn btn-sm btn-danger">Delete</a>
+                    </td>
+                </tr>
+                
+          <?php } 
             ?>
             </tbody>
         </table>

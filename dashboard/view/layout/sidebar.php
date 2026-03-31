@@ -1,6 +1,10 @@
-<?php if (!empty($showSidebar)) { ?>
+<?php if (!isset($_SESSION["id"])){ ?>
+   <script>
+    window.location.href = "../../index.php";
+   </script>
+<?php } ?>
 
-    <div class="col-md-3">
+    <div class="col-md-3 mb-4">
         <div class="sidebar p-3 shadow-sm">
             <h6 class="">Quick Links</h6>
 
@@ -27,5 +31,3 @@
             </ul>
         </div>
     </div>
-
-<?php } ?>

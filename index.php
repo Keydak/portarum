@@ -2,6 +2,12 @@
 
 include "./config/koneksi.php";
 
+if (isset($_SESSION['id'])) { ?>
+   <script>
+    window.location.href = "./dashboard/index.php";
+   </script>
+ 
+<?php }
 
 ?>
 
@@ -79,7 +85,7 @@ include "./config/koneksi.php";
           </p>
 
           <div class="mt-4">
-            <a href="#" class="btn btn-primary me-2">Mulai Menulis</a>
+            <a data-bs-toggle="modal" data-bs-target="#authModal" class="btn btn-primary me-2">Mulai Menulis</a>
           </div>
         </div>
 
@@ -276,7 +282,7 @@ include "./config/koneksi.php";
       <p class="text-muted">
         Tulis pengalaman bug hunting, share tutorial, dan bantu komunitas berkembang.
       </p>
-      <a href="#" class="btn btn-primary">Mulai Sekarang</a>
+      <a data-bs-toggle="modal" data-bs-target="#authModal" class="btn btn-primary">Mulai Sekarang</a>
     </div>
   </section>
 
