@@ -7,7 +7,7 @@
 <?php
 $user_id = mysqli_real_escape_string($conn, $_SESSION['id']);
 
-$stmt_profile = $conn->prepare("SELECT nama, username,password, photo FROM profile WHERE UUID = ?");
+$stmt_profile = $conn->prepare("SELECT nama, username,password, photo,bio FROM profile WHERE UUID = ?");
 $stmt_profile->bind_param("s", $user_id);
 $stmt_profile->execute();
 $result_profile = $stmt_profile->get_result();
@@ -37,6 +37,10 @@ $row_profile = $result_profile->fetch_assoc();
             <div class="mb-3">
                 <label class="form-label">Nama</label>
                 <input type="text" class="form-control" name="name" value="<?php echo htmlspecialchars($row_profile['nama']); ?>">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">bio</label>
+                <textarea name="bio" class="form-control" id="bio" rows="3"><?php echo htmlspecialchars($row_profile['bio']); ?></textarea>
             </div>
 
             <!-- Username -->
@@ -116,7 +120,7 @@ if (isset($_POST["Update_password"])) {
             </script>';
             exit;
         }
-    }else{
+    } else {
         echo 'a';
     }
 }
@@ -126,6 +130,7 @@ if (isset($_POST['Update'])) {
 
 
     $nama = htmlspecialchars(isset($_POST['name']) ? $_POST['name'] : '');
+    $bio = htmlspecialchars(isset($_POST['bio']) ? $_POST['bio'] : '');
 
 
     $ekstensi_diperbolehkan = array('jpg', 'jpeg', 'png', 'webp');
@@ -154,7 +159,7 @@ if (isset($_POST['Update'])) {
                         text: "Ada field yang kosong!",
                         icon: "error"
                     }).then(() => {
-                            window.location.href = "./?page=create&action=write";
+                            window.location.href = "./?page=setting&action=profile";
                         });
                 </script>';
         exit;
@@ -167,9 +172,10 @@ if (isset($_POST['Update'])) {
 
                 $stmt_update = $conn->prepare('UPDATE profile SET
                     photo = ?,
-                    nama = ?
+                    nama = ?,
+                    bio = ?
                     WHERE UUID = ?');
-                $stmt_update->bind_param('sss', $hashed_file_name, $nama, $_SESSION['id']);
+                $stmt_update->bind_param('ssss', $hashed_file_name, $nama, $bio, $_SESSION['id']);
 
                 if ($stmt_update->execute()) {
                     if ($gambar_lama == "default.jpg") {
@@ -195,7 +201,7 @@ if (isset($_POST['Update'])) {
                             text: "Gagal Update Data!",
                             icon: "error"
                         }).then(() => {
-                    window.location.href="./?page=update&action=edit_blog&id=' . $blog_id . '";                        
+                    window.location.href="./?page=setting&action=profile";                        
                     });
                     </script>';
                     exit;
@@ -207,7 +213,7 @@ if (isset($_POST['Update'])) {
                         text: "Ukuran tidak lebih dari 2mb!",
                         icon: "error"
                     }).then(() => {
-                window.location.href="./?page=update&action=edit_blog&id=' . $blog_id . '";                        
+                window.location.href="./?page=setting&action=profile";                        
                 });
                 </script>';
                 exit;
@@ -219,17 +225,17 @@ if (isset($_POST['Update'])) {
                     text: "Format harus jpg, jpeg, atau png!",
                     icon: "error"
                 }).then(() => {
-            window.location.href="./?page=update&action=edit_blog&id=' . $blog_id . '";                        
+            window.location.href="./?page=setting&action=profile";                        
             });
             </script>';
             exit;
         }
     } else {
         $stmt_update = $conn->prepare('UPDATE profile SET
-                    nama = ?
-      
+                    nama = ?,
+                    bio = ?
                     WHERE UUID = ?');
-        $stmt_update->bind_param('ss', $nama, $_SESSION['id']);
+        $stmt_update->bind_param('sss', $nama, $bio, $_SESSION['id']);
 
         if ($stmt_update->execute()) {
             echo '<script>
@@ -238,7 +244,7 @@ if (isset($_POST['Update'])) {
             text: "Berhasil Update Data!",
             icon: "success"
         }).then(() => {
-            window.location.href = "./?page=setting&action=library";
+            window.location.href = "./?page=setting&action=profile";
         });
     </script>';
             exit;

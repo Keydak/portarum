@@ -36,6 +36,8 @@ if (isset($_GET['id'])) {
             a.created_at,
             a.status,
             a.is_takedown,
+            p.photo,
+            p.username,
             p.UUID as author_uuid
         FROM article a
         JOIN profile p ON a.id_profile = p.id_profile
@@ -144,9 +146,9 @@ $isLiked = $stmt->get_result()->num_rows > 0;
 
     <!-- Author -->
     <div class="d-flex align-items-center mb-4">
-        <img src="https://i.pravatar.cc/40" class="rounded-circle me-2" width="40" height="40">
+        <img src="./../assets/image/profile/<?php echo htmlspecialchars($row['photo']); ?>" class="rounded-circle me-2" width="40" height="40">
         <div>
-            <div class="fw-semibold"><?php echo htmlspecialchars($row['nama']); ?></div>
+            <div class="fw-semibold"><a style="text-decoration: none; color: inherit;" href="?page=read&action=profile&username=<?= $row['username'] ?>" target="_self" rel="noopener noreferrer"><?= htmlspecialchars($row['username']) ?></a></div>
             <small class="text-muted"><?php echo htmlspecialchars(formatTanggalRead($row['created_at'])); ?> </small>
         </div>
     </div>

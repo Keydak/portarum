@@ -147,7 +147,7 @@ if (isset($_POST['create'])) {
                 if ($ukuran < 2097152) {
                     $hashed_file_name = "tb-" . substr(date("dmyhis"), 0, 35) . '.' . $ekstensi;
 
-                    $stmt_insert = $conn->prepare('INSERT INTO article (UUID,thumbnail,title,content,status,is_takedown,created_at,id_profile,category_id,views) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0)');
+                    $stmt_insert = $conn->prepare('INSERT INTO article (UUID,thumbnail,title,content,status,is_takedown,created_at,id_profile,category_id,views,likes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0,0)');
                     $stmt_insert->bind_param('sssssssss', $uuid, $hashed_file_name, $title, $content, $status, $no, $tgl_upload, $row['id_profile'], $category);
 
                     if ($stmt_insert->execute()) {

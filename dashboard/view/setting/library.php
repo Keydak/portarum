@@ -89,19 +89,19 @@ if (isset($_GET['delete_id'])) {
         <div class="row text-center">
             <div class="col-md-4">
                 <div class="card-box">
-                    <h3><?= $row_views['total_article']  ?></h3>
+                    <h3><?= $row_views['total_article'] ?: 0 ?></h3>
                     <p>Articles</p>
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="card-box">
-                    <h3><?= $row_views['total_likes']  ?></h3>
+                    <h3><?= $row_views['total_likes'] ?: 0 ?></h3>
                     <p>Total Likes</p>
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="card-box">
-                    <h3><?= $row_views['total_views']  ?></h3>
+                    <h3><?= $row_views['total_views'] ?: 0 ?></h3>
                     <p>Total Views</p>
                 </div>
             </div>

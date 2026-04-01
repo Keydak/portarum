@@ -16,10 +16,12 @@ $stmt_algoritma = $conn->prepare("SELECT
     a.UUID,
     p.username,
     p.nama,
+    p.photo,
+    c.nama AS category_name,
     (
         (a.views + 1) / (TIMESTAMPDIFF(HOUR, a.created_at, NOW()) + 2)
     ) AS score  
-FROM article a JOIN profile p ON a.id_profile = p.id_profile
+FROM article a JOIN profile p ON a.id_profile = p.id_profile JOIN category c ON a.category_id = c.category_id
 WHERE a.status = 'publish' 
 AND a.is_takedown = 'NO'
 ORDER BY score DESC
@@ -42,6 +44,72 @@ $stmt_random->execute();
 $result_random = $stmt_random->get_result();
 $row_random = $result_random->fetch_assoc();
 
+$stmt_random_user = $conn->prepare("SELECT 
+    p.nama,
+    p.username,
+    p.photo,
+    p.UUID FROM profile p
+WHERE p.id_profile >= (
+    SELECT FLOOR(RAND() * (SELECT MAX(id_profile) FROM profile))
+)
+LIMIT 3");
+$stmt_random_user->execute();
+$result_random_user = $stmt_random_user->get_result();
+$row_random_user_single = $result_random_user->fetch_assoc();
+
+
+$limit = 5;
+$page = isset($_GET['pg']) ? (int)$_GET['pg'] : 1;
+
+$search = isset($_GET['q']) ? trim($_GET['q']) : '';
+$search_param = "%$search%";
+
+$offset = ($page - 1) * $limit;
+
+$stmt_pg = $conn->prepare("
+ SELECT
+    a.title,
+    a.thumbnail,
+    a.created_at,
+    a.views,
+    a.likes,
+    a.content,
+    a.UUID,
+    p.username,
+    p.nama,
+    p.photo,
+    c.nama AS category_name,
+    (
+        (a.views + 1) / (TIMESTAMPDIFF(HOUR, a.created_at, NOW()) + 2)
+    ) AS score  
+FROM article a JOIN profile p ON a.id_profile = p.id_profile JOIN category c ON a.category_id = c.category_id
+WHERE a.status = 'publish' 
+AND a.is_takedown = 'NO'
+ORDER BY (a.views * 1 + a.likes * 2) DESC
+LIMIT ? OFFSET ?
+");
+
+$stmt_pg->bind_param("ii", $limit, $offset);
+$stmt_pg->execute();
+$result_pg = $stmt_pg->get_result();
+
+$total_query_pg = $conn->prepare("
+    SELECT COUNT(*) as total 
+    FROM article a 
+    JOIN profile p 
+        ON a.id_profile = p.id_profile 
+    WHERE a.status = 'publish'
+    AND (a.title LIKE ? OR a.content LIKE ?)
+");
+
+$total_query_pg->bind_param("ss", $search_param, $search_param);
+$total_query_pg->execute();
+$result_total_pg = $total_query_pg->get_result();
+
+$total_data = $result_total_pg->fetch_assoc()['total'];
+
+$total_pages = ceil($total_data / $limit);
+
 
 ?>
 
@@ -52,7 +120,7 @@ $row_random = $result_random->fetch_assoc();
         <h5 class="fw-bold mb-3">Berita Terpopuler</h5>
 
         <!-- Item -->
-        <?php foreach ($result_algoritma as $row_algoritma) {
+        <?php foreach ($result_pg as $row_algoritma) {
             $content = strip_tags($row_algoritma['content']);
             $words = str_word_count($content);
 
@@ -62,7 +130,7 @@ $row_random = $result_random->fetch_assoc();
             <div class="card bg-transparent border-0 border-bottom rounded-0 mb-3 pb-3">
 
 
-                <div class="row g-0 align-items-center" onclick="window.open('?page=read&action=readarticle&id=<?= $row_algoritma['UUID'] ?>','_blank')"
+                <div class="row g-0 align-items-center" onclick="window.open('?page=read&action=readarticle&id=<?= $row_algoritma['UUID'] ?>','_self')"
                     style="cursor:pointer;">
 
                     <!-- LEFT -->
@@ -71,12 +139,12 @@ $row_random = $result_random->fetch_assoc();
 
                             <!-- AUTHOR -->
                             <div class="d-flex align-items-center mb-1">
-                                <img src="../assets/image/profile/default.png"
+                                <img src="../assets/image/profile/<?= $row_algoritma['photo'] ?>" alt="Avatar"
                                     class="rounded-circle me-2"
                                     width="24" height="24">
 
                                 <small class="text-muted">
-                                    <a style="color: black; " href="?page=read&action=profile&username=<?= $row_algoritma['username'] ?>" target="_blank" onclick="event.stopPropagation();" rel="noopener noreferrer"><?= $row_algoritma['nama'] ?></a>
+                                    <a style="color: black;" href="?page=read&action=profile&username=<?= $row_algoritma['username'] ?>" target="_self" onclick="event.stopPropagation();" rel="noopener noreferrer"><?= $row_algoritma['nama'] ?></a>
                                 </small>
                             </div>
 
@@ -87,7 +155,7 @@ $row_random = $result_random->fetch_assoc();
 
                             <!-- META -->
                             <small class="text-muted">
-                                <?= formatTanggalRead($row_algoritma['created_at']) ?> • <?= $reading_time ?> menit baca
+                                <?= formatTanggalRead($row_algoritma['created_at']) ?> • <?= $reading_time ?> menit baca • <?= $row_algoritma['category_name'] ?>
                             </small>
 
                             <!-- ACTION -->
@@ -121,7 +189,28 @@ $row_random = $result_random->fetch_assoc();
 
             </div>
         <?php } ?>
+        <nav>
+            <ul class="pagination justify-content-center">
 
+                <!-- PREVIOUS -->
+                <li class="page-item <?= ($page <= 1) ? 'disabled' : '' ?>">
+                    <a class="page-link" href="?page=read&action=profile&username=<?= $username ?>&pg=<?= $page - 1 ?>&q=<?= urldecode($search) ?>">Previous</a>
+                </li>
+
+                <!-- PAGE NUMBER -->
+                <?php for ($i = 1; $i <= $total_pages; $i++) : ?>
+                    <li class="page-item <?= ($i == $page) ? 'active' : '' ?>">
+                        <a class="page-link" href="?page=read&action=profile&username=<?= $username ?>&pg=<?= $i ?>&q=<?= urldecode($search) ?>"><?= $i ?></a>
+                    </li>
+                <?php endfor; ?>
+
+                <!-- NEXT -->
+                <li class="page-item <?= ($page >= $total_pages) ? 'disabled' : '' ?>">
+                    <a class="page-link" href="?page=read&action=profile&username=<?= $username ?>&pg=<?= $page + 1 ?>&q=<?= urldecode($search) ?>">Next</a>
+                </li>
+
+            </ul>
+        </nav>
     </div>
 </div>
 
@@ -137,10 +226,10 @@ $row_random = $result_random->fetch_assoc();
 
                     <!-- ITEM -->
                     <?php foreach ($result_random as $row_random) { ?>
-                        <div class="d-flex mb-3 align-items-start rekom-item">
+                        <div class="d-flex mb-3 align-items-start rekom-item" onclick="window.open('?page=read&action=readarticle&id=<?= $row_algoritma['UUID'] ?>','_self')" style="cursor:pointer;">
 
                             <!-- IMAGE -->
-                            <div style="width:80px; height:60px; overflow:hidden; border-radius:6px;">
+                            <div style="width:100px; height:60px; overflow:hidden; border-radius:6px; object-fit: cover;">
                                 <img src="../assets/image/thumbnail/<?= $row_random['thumbnail'] ?>"
                                     style="width:100%; height:100%; object-fit:cover;">
                             </div>
@@ -162,6 +251,43 @@ $row_random = $result_random->fetch_assoc();
                         </div>
                     <?php } ?>
 
+                </div>
+                <div class="border-bottom pb-2">
+                    <h6 class="fw-bold mb-1 mt-2">User</h6>
+
+                    <?php
+
+                    foreach ($result_random_user as $row_random_user) {
+                        if ($row_random_user['UUID'] === $_SESSION['id']) continue;
+                    ?>
+
+                        <div class="d-flex align-item s-center justify-content-between mb-3 p-2 rounded hover-shadow" onclick="window.open('?page=read&action=profile&username=<?= $row_random_user['username'] ?>','_self')" style="cursor:pointer;">
+
+                            <!-- LEFT -->
+                            <div class="d-flex align-items-center">
+
+                                <img src="../assets/image/profile/<?= $row_random_user['photo'] ?>"
+                                    class="rounded-circle me-2"
+                                    width="40" height="40" style="object-fit:cover;">
+
+                                <div>
+                                    <small class="fw-semibold d-block">
+                                        <?= $row_random_user['nama'] ?>
+                                    </small>
+
+                                    <small class="text-muted">
+                                        @<?= $row_random_user['username'] ?>
+                                    </small>
+                                </div>
+
+                            </div>
+
+                            <!-- RIGHT -->
+
+                        </div>
+
+                    <?php }
+                    ?>
                 </div>
 
             </div>

@@ -154,7 +154,7 @@ $row_user = $result_user->fetch_assoc();
   <!-- Navbar -->
   <nav class="navbar navbar-expand-lg bg-white shadow-sm sticky-top">
     <div class="container">
-      <a class="navbar-brand fw-bold" href="#">Portarum</a>
+      <a class="navbar-brand fw-bold" href="?page=home">Portarum</a>
       <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#nav">
         <span class="navbar-toggler-icon"></span>
       </button>

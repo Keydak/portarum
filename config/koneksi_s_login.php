@@ -51,4 +51,26 @@ function formatTanggalRead($date) {
 }
 
 
+function timeAgo($datetime) {
+    $time = strtotime($datetime);
+    $now = time();
+    $diff = $now - $time;
+
+    if ($diff < 60) {
+        return $diff . ' detik yang lalu';
+    } elseif ($diff < 3600) {
+        return floor($diff / 60) . ' menit yang lalu';
+    } elseif ($diff < 86400) {
+        return floor($diff / 3600) . ' jam yang lalu';
+    } elseif ($diff < 604800) {
+        return floor($diff / 86400) . ' hari yang lalu';
+    } elseif ($diff < 2419200) {
+        return floor($diff / 604800) . ' minggu yang lalu';
+    } elseif ($diff < 29030400) {
+        return floor($diff / 2419200) . ' bulan yang lalu';
+    } else {
+        return date('d M Y', $time);
+    }
+}
+
 ?>

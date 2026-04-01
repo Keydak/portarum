@@ -417,7 +417,7 @@ if (isset($_POST["signin"])) {
       </script>';
     } else {
       $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-      $stmt_insert = $conn->prepare("INSERT INTO profile (UUID, username, password,nama) VALUES (?, ?, ?, ?)");
+      $stmt_insert = $conn->prepare("INSERT INTO profile (UUID, username, password,nama,photo, bio) VALUES (?, ?, ?, ?, 'default.jpg', '')");
       $stmt_insert->bind_param("ssss", $uuid, $username, $hashed_password, $nama);
       $stmt_insert->execute();
       $_SESSION["id"] = $uuid;
