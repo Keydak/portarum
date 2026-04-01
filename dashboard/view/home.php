@@ -64,6 +64,8 @@ $page = isset($_GET['pg']) ? (int)$_GET['pg'] : 1;
 $search = isset($_GET['q']) ? trim($_GET['q']) : '';
 $search_param = "%$search%";
 
+$category = isset($_GET['category']) ? $_GET['category'] : 'all';
+
 $offset = ($page - 1) * $limit;
 
 $stmt_pg = $conn->prepare("
@@ -84,12 +86,14 @@ $stmt_pg = $conn->prepare("
     ) AS score  
 FROM article a JOIN profile p ON a.id_profile = p.id_profile JOIN category c ON a.category_id = c.category_id
 WHERE a.status = 'publish' 
+AND (a.title LIKE ?)
 AND a.is_takedown = 'NO'
+AND (? = 'all' OR a.category_id = ?)
 ORDER BY (a.views * 1 + a.likes * 2) DESC
 LIMIT ? OFFSET ?
 ");
 
-$stmt_pg->bind_param("ii", $limit, $offset);
+$stmt_pg->bind_param("sssii", $search_param, $category, $category, $limit, $offset);
 $stmt_pg->execute();
 $result_pg = $stmt_pg->get_result();
 
@@ -99,10 +103,11 @@ $total_query_pg = $conn->prepare("
     JOIN profile p 
         ON a.id_profile = p.id_profile 
     WHERE a.status = 'publish'
-    AND (a.title LIKE ? OR a.content LIKE ?)
+    AND (a.title LIKE ?)
+    AND (? = 'all' OR a.category_id = ?)
 ");
 
-$total_query_pg->bind_param("ss", $search_param, $search_param);
+$total_query_pg->bind_param("sss", $search_param, $category, $category);
 $total_query_pg->execute();
 $result_total_pg = $total_query_pg->get_result();
 
@@ -110,11 +115,49 @@ $total_data = $result_total_pg->fetch_assoc()['total'];
 
 $total_pages = ceil($total_data / $limit);
 
+$range = 2;
+
+$start = max(1, $page - $range);
+$end = min($total_pages, $page + $range);
 
 ?>
 
 <!-- LEFT: Berita -->
 <div class="col-lg-8 border-end">
+
+    <div class="card p-3 shadow-sm mb-4">
+
+        <!-- SEARCH BAR -->
+        <form class="mb-3" method="GET">
+            <input type="hidden" name="page" value="home">
+            <input type="hidden" name="pg" value="1">
+            <div class="d-flex gap-2">
+                <div class="d-flex gap-2 flex-grow-1" style="flex-direction: row-reverse;">
+                    <input type="text" class="form-control" placeholder="Search articles..." name="q" value="<?= htmlspecialchars($search) ?>">
+
+                    <select class="form-select" id="category-search" name="category" style="max-width: 180px;">
+                        <option value="all">All Category</option>
+                        <?php
+                        $stmt_category = $conn->prepare("SELECT * FROM category");
+                        $stmt_category->execute();
+                        $result_category = $stmt_category->get_result();
+
+                        while ($row_category = $result_category->fetch_assoc()) { ?>
+                        <option value="<?= $row_category['category_id'] ?>" <?= ($category == $row_category['category_id']) ? 'selected' : '' ?>><?= $row_category['nama'] ?></option>
+                      <?php } 
+                        ?>
+                    </select>
+                </div>
+
+                <button class="btn btn-primary">
+                    Search
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
 
     <div style="max-width:800px;">
         <h5 class="fw-bold mb-3">Berita Terpopuler</h5>
@@ -155,7 +198,7 @@ $total_pages = ceil($total_data / $limit);
 
                             <!-- META -->
                             <small class="text-muted">
-                                <?= formatTanggalRead($row_algoritma['created_at']) ?> • <?= $reading_time ?> menit baca • <?= $row_algoritma['category_name'] ?>
+                                <?= timeAgo($row_algoritma['created_at']) ?> • <?= $reading_time ?> menit baca • <?= $row_algoritma['category_name'] ?>
                             </small>
 
                             <!-- ACTION -->
@@ -189,28 +232,50 @@ $total_pages = ceil($total_data / $limit);
 
             </div>
         <?php } ?>
-        <nav>
-            <ul class="pagination justify-content-center">
 
-                <!-- PREVIOUS -->
-                <li class="page-item <?= ($page <= 1) ? 'disabled' : '' ?>">
-                    <a class="page-link" href="?page=read&action=profile&username=<?= $username ?>&pg=<?= $page - 1 ?>&q=<?= urldecode($search) ?>">Previous</a>
-                </li>
 
-                <!-- PAGE NUMBER -->
-                <?php for ($i = 1; $i <= $total_pages; $i++) : ?>
-                    <li class="page-item <?= ($i == $page) ? 'active' : '' ?>">
-                        <a class="page-link" href="?page=read&action=profile&username=<?= $username ?>&pg=<?= $i ?>&q=<?= urldecode($search) ?>"><?= $i ?></a>
+            <nav>
+                <ul class="pagination justify-content-center">
+
+                    <!-- PREVIOUS -->
+                    <li class="page-item <?= ($page <= 1) ? 'disabled' : '' ?>">
+                        <a class="page-link" href="?page=home&pg=<?= $page - 1 ?>&q=<?= urldecode($search) ?>&category=<?= urldecode($category) ?>">Previous</a>
                     </li>
-                <?php endfor; ?>
 
-                <!-- NEXT -->
-                <li class="page-item <?= ($page >= $total_pages) ? 'disabled' : '' ?>">
-                    <a class="page-link" href="?page=read&action=profile&username=<?= $username ?>&pg=<?= $page + 1 ?>&q=<?= urldecode($search) ?>">Next</a>
-                </li>
+                    <!-- FIRST -->
+                    <?php if ($start > 1): ?>
+                        <li class="page-item"><a class="page-link" href="?page=home&pg=1&q=<?= urldecode($search) ?>&category=<?= urldecode($category) ?>">1</a></li>
+                        <?php if ($start > 2): ?>
+                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                        <?php endif; ?>
+                    <?php endif; ?>
 
-            </ul>
-        </nav>
+                    <!-- MIDDLE -->
+                    <?php for ($i = $start; $i <= $end; $i++): ?>
+                        <li class="page-item <?= ($i == $page) ? 'active' : '' ?>">
+                            <a class="page-link" href="?page=home&pg=<?= $i ?>&q=<?= urldecode($search) ?>&category=<?= urldecode($category) ?>">
+                                <?= $i ?>
+                            </a>
+                        </li>
+                    <?php endfor; ?>
+
+                    <!-- LAST -->
+                    <?php if ($end < $total_pages): ?>
+                        <?php if ($end < $total_pages - 1): ?>
+                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                        <?php endif; ?>
+                        <li class="page-item">
+                            <a class="page-link" href="?page=home&pg=<?= $total_pages ?>&q=<?= urldecode($search) ?>&category=<?= urldecode($category) ?>"><?= $total_pages ?></a>
+                        </li>
+                    <?php endif; ?>
+
+                    <!-- NEXT -->
+                    <li class="page-item <?= ($page >= $total_pages) ? 'disabled' : '' ?>">
+                        <a class="page-link" href="?page=home&pg=<?= $page + 1 ?>&q=<?= urldecode($search) ?>&category=<?= urldecode($category) ?>">Next</a>
+                    </li>
+
+                </ul>
+            </nav>
     </div>
 </div>
 
@@ -226,7 +291,7 @@ $total_pages = ceil($total_data / $limit);
 
                     <!-- ITEM -->
                     <?php foreach ($result_random as $row_random) { ?>
-                        <div class="d-flex mb-3 align-items-start rekom-item" onclick="window.open('?page=read&action=readarticle&id=<?= $row_algoritma['UUID'] ?>','_self')" style="cursor:pointer;">
+                        <div class="d-flex mb-3 align-items-start rekom-item" onclick="window.open('?page=read&action=readarticle&id=<?= $row_random['UUID'] ?>','_self')" style="cursor:pointer;">
 
                             <!-- IMAGE -->
                             <div style="width:100px; height:60px; overflow:hidden; border-radius:6px; object-fit: cover;">

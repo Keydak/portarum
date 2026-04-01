@@ -39,6 +39,7 @@ $row_user = $result_user->fetch_assoc();
 
   <link rel="stylesheet" href="../assets/css/select2.min.css">
   <script src="../assets/js/select2.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
     body {
       background: #f8f9fa;
@@ -165,11 +166,6 @@ $row_user = $result_user->fetch_assoc();
           <li class="nav-item">
             <a class="nav-link active" href="?page=home">Home</a>
           </li>
-
-          <li class="nav-item">
-            <a class="nav-link" href="?page=read&action=search">Search</a>
-          </li>
-
           <!-- USER DROPDOWN -->
           <li class="nav-item dropdown">
             <a href="#" class="d-flex align-items-center nav-link dropdown-toggle" data-bs-toggle="dropdown">
@@ -215,6 +211,10 @@ $row_user = $result_user->fetch_assoc();
               include "./view/layout/sidebar.php";
               include "./create/write.php";
               break;
+            case "category":
+              include "./view/layout/sidebar.php";
+              include "./create/category.php";
+              break;
             default:
               include "./view/home.php";
           }
@@ -224,6 +224,10 @@ $row_user = $result_user->fetch_assoc();
             case "edit_blog":
               include "./view/layout/sidebar.php";
               include "./update/write_update.php";
+              break;
+            case "edit_category":
+              include "./view/layout/sidebar.php";
+              include "./update/category_update.php";
               break;
             default:
               include "./view/home.php";
@@ -253,6 +257,10 @@ $row_user = $result_user->fetch_assoc();
             case "profile":
               include "./view/layout/sidebar.php";
               include "./view/setting/profile.php";
+              break;
+            case "activity":
+              include "./view/layout/sidebar.php";
+              include "./view/setting/activity.php";
               break;
             default:
               include "./view/home.php";
@@ -353,6 +361,15 @@ $row_user = $result_user->fetch_assoc();
       });
     });
 
+    $(document).ready(function() {
+      $('#category-search').select2({
+        placeholder: "Pilih Category",
+        width: '100%'
+      });
+    });
+    $('#category-search').select2({
+      width: 'resolved'
+    });
 
 
     $(document).ready(function() {
@@ -360,6 +377,23 @@ $row_user = $result_user->fetch_assoc();
         paging: true,
         pageLength: 10,
         lengthMenu: [10, 25, 50],
+        searching: true,
+        ordering: true,
+        info: false
+      });
+    });
+
+    $(document).ready(function() {
+      $('#myTable-category').DataTable({
+        columnDefs: [{
+            searchable: false,
+            targets: [1, 2]
+          } // kolom yang tidak boleh dicari
+        ],
+
+        paging: true,
+        pageLength: 5,
+        lengthMenu: [5, 10, 25, 50],
         searching: true,
         ordering: true,
         info: false

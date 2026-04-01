@@ -8,6 +8,7 @@
 <?php
 if (isset($_GET['id'])) {
 
+    $id = mysqli_real_escape_string($conn, $_SESSION['id']);
     $blog_id = mysqli_real_escape_string($conn, $_GET['id']);
 
     // validasi UUID
@@ -24,7 +25,7 @@ if (isset($_GET['id'])) {
         exit;
     }
 
-    // ambil artikel
+    // ambil data artikel dan penulis
     $stmt = $conn->prepare("
         SELECT 
             a.thumbnail,
@@ -49,10 +50,24 @@ if (isset($_GET['id'])) {
     $result = $stmt->get_result();
     $row = $result->fetch_assoc();
 
+    //cek akses
+    $stmt_admin = $conn->prepare("
+        SELECT 
+           is_admin
+        FROM profile 
+        WHERE UUID = ?
+    ");
+    $stmt_admin->bind_param("s", $id);
+    $stmt_admin->execute();
+
+    $result_admin = $stmt_admin->get_result();
+    $row_admin = $result_admin->fetch_assoc();
+
+
     // cek akses
     if (
         $row['status'] === 'draft' &&
-        $_SESSION['id'] !== $row['author_uuid']
+        $_SESSION['id'] !== $row['author_uuid'] && $row_admin['is_admin'] === 'NO'
     ) {
         echo '<script>
             Swal.fire({
@@ -106,10 +121,11 @@ if ($stmt_view_insert->affected_rows > 0) {
     $stmt2->execute();
 }
 
-$stmt = $conn->prepare("SELECT COUNT(*) as total FROM article_like WHERE article_id=?");
-$stmt->bind_param("s", $row_view_article['article_id']);
-$stmt->execute();
-$total_like = $stmt->get_result()->fetch_assoc()['total'];
+//ambil total like
+$stmt_total_like = $conn->prepare("SELECT COUNT(*) as total FROM article_like WHERE article_id=?");
+$stmt_total_like->bind_param("s", $row_view_article['article_id']);
+$stmt_total_like->execute();
+$total_like = $stmt_total_like->get_result()->fetch_assoc()['total'];
 
 // cek user sudah like
 $stmt = $conn->prepare("SELECT 1 FROM article_like WHERE article_id=? AND id_profile=?");
@@ -117,24 +133,71 @@ $stmt->bind_param("ss", $row_view_article['article_id'], $row_view['id_profile']
 $stmt->execute();
 $isLiked = $stmt->get_result()->num_rows > 0;
 
+// admin takedown
+if (isset($_POST['takedown']) && $row_admin['is_admin'] === "YES") {
+
+    $stmt_article_takedown = $conn->prepare("UPDATE article SET is_takedown = 'YES', status = 'draft' WHERE article_id = ?");
+    $stmt_article_takedown->bind_param("s", $row_view_article['article_id']);
+    if ($stmt_article_takedown->execute()) {
+        echo '<script>
+            Swal.fire({
+                title: "Artikel Berhasil Ditakedown",
+                text: "Artikel telah berhasil ditakedown.",
+                icon: "success"
+            }).then(() => {
+                window.location.href = "";
+            });
+        </script>';
+        exit;
+    }
+}
+
+//admin untakedown
+if (isset($_POST['untakedown']) && $row_admin['is_admin'] === "YES") {
+
+    $stmt_article_takedown = $conn->prepare("UPDATE article SET is_takedown = 'NO' WHERE article_id = ?");
+    $stmt_article_takedown->bind_param("s", $row_view_article['article_id']);
+    if ($stmt_article_takedown->execute()) {
+        echo '<script>
+            Swal.fire({
+                title: "Artikel Berhasil Di-Untakedown",
+                text: "Artikel telah berhasil di-untakedown.",
+                icon: "success"
+            }).then(() => {
+                window.location.href = "";
+            });
+        </script>';
+        exit;
+    }
+}
+
 ?>
 
 <div class="col-lg-8 col-xl-7">
     <?php
-    if ($row['status'] === 'draft') { ?>
-        <div class="alert alert-warning" role="alert">
-            <i class="fa-solid fa-triangle-exclamation me-2"></i>
-            Artikel ini masih dalam status <strong>Draft</strong>. Hanya Anda yang dapat melihatnya.
-        </div>
-    <?php }
-    ?>
-
-    <?php
-    if ($row['is_takedown'] === 'YES') { ?>
+    if ($row_admin['is_admin'] === "YES" && $row['is_takedown'] === 'YES') { ?>
         <div class="alert alert-danger" role="alert">
             <i class="fa-solid fa-triangle-exclamation me-2"></i>
-            Artikel ini telah <strong>Ditakedown</strong> oleh admin.
+            Anda <strong>Mengtakedown</strong> Artikel ini telah.
         </div>
+    <?php } else { ?>
+        <?php
+        if ($row['status'] === 'draft') { ?>
+            <div class="alert alert-warning" role="alert">
+                <i class="fa-solid fa-triangle-exclamation me-2"></i>
+                Artikel ini masih dalam status <strong>Draft</strong>. Hanya Author dan Admin yang dapat melihatnya.
+            </div>
+        <?php }
+        ?>
+
+        <?php
+        if ($row['is_takedown'] === 'YES') { ?>
+            <div class="alert alert-danger" role="alert">
+                <i class="fa-solid fa-triangle-exclamation me-2"></i>
+                Artikel ini telah <strong>Ditakedown</strong> oleh admin.
+            </div>
+        <?php }
+        ?>
     <?php }
     ?>
     <!-- Title -->
@@ -153,9 +216,10 @@ $isLiked = $stmt->get_result()->num_rows > 0;
         </div>
     </div>
     <!-- Cover Image -->
-    <img src="./../assets/image/thumbnail/<?php echo htmlspecialchars($row['thumbnail']); ?>" alt="Thumbnail"
-        class="img-fluid rounded mb-4">
-
+    <div style="width:600px; aspect-ratio:16/10; overflow:hidden; border-radius:8px;">
+        <img src="../assets/image/thumbnail/<?= $row['thumbnail'] ?>"
+            style="width:100%; height:100%; object-fit:cover;">
+    </div>
     <hr>
 
     <div class="d-flex justify-content-between align-items-center">
@@ -165,7 +229,22 @@ $isLiked = $stmt->get_result()->num_rows > 0;
             </button>
             <span id="likeCount"><?= $total_like ?></span>
         </div>
-        <small class="text-muted"><?php echo $row['views']; ?> views</small>
+        <?php
+        if ($row_admin['is_admin'] === "YES") { ?>
+                <form  method="POST">
+                    <?php
+                    if ($row['is_takedown'] === 'YES') { ?>
+
+                        <button class="btn btn-sm btn-outline-danger" name="untakedown">Untakedown</button>
+
+                    <?php } else { ?>
+                        <button class="btn btn-sm btn-outline-danger" name="takedown">Takedown</button>
+                    <?php }
+                    ?>
+                </form>
+            <?php }
+            ?>
+            <small class="text-muted"><?php echo $row['views']; ?> views</small>
     </div>
     <hr>
     <!-- Content -->
@@ -181,24 +260,24 @@ $isLiked = $stmt->get_result()->num_rows > 0;
 </div>
 
 <script>
-$('#likeBtn').click(function() {
-    $.ajax({
-        url: '../config/like.php',
-        method: 'POST',
-        data: {
-            article_id: '<?= $blog_id ?>'
-        },
-        success: function(res) {
-            let data = JSON.parse(res);
+    $('#likeBtn').click(function() {
+        $.ajax({
+            url: '../config/like.php',
+            method: 'POST',
+            data: {
+                article_id: '<?= $blog_id ?>'
+            },
+            success: function(res) {
+                let data = JSON.parse(res);
 
-            $('#likeCount').text(data.total);
+                $('#likeCount').text(data.total);
 
-            if (data.status === 'liked') {
-                $('#likeBtn').removeClass('btn-outline-primary').addClass('btn-primary');
-            } else {
-                $('#likeBtn').removeClass('btn-primary').addClass('btn-outline-primary');
+                if (data.status === 'liked') {
+                    $('#likeBtn').removeClass('btn-outline-primary').addClass('btn-primary');
+                } else {
+                    $('#likeBtn').removeClass('btn-primary').addClass('btn-outline-primary');
+                }
             }
-        }
+        });
     });
-});
 </script>

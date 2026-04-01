@@ -81,10 +81,9 @@ if (isset($_GET['delete_id'])) {
 }
 
 ?>
-<!-- Main Content -->
+
 <div class="col-md-9">
 
-    <!-- Overview -->
     <div class="card p-3 shadow-sm mb-4">
         <div class="row text-center">
             <div class="col-md-4">
@@ -108,7 +107,7 @@ if (isset($_GET['delete_id'])) {
         </div>
     </div>
 
-    <!-- Latest Articles -->
+
     <div class="card p-3 shadow-sm">
         <h5>Articles</h5>
         <div class="table-responsive">

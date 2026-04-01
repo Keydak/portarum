@@ -5,6 +5,20 @@
 <?php } ?>
 
 <?php
+$uuid = mysqli_real_escape_string($conn, $_SESSION["id"]);
+
+$stmt_admin = $conn->prepare("
+   SELECT 
+      is_admin
+    FROM profile
+    WHERE UUID = ?
+");
+$stmt_admin->bind_param("s", $uuid);
+$stmt_admin->execute();
+
+$result_admin = $stmt_admin->get_result();
+$row_admin = $result_admin->fetch_assoc();
+
 if (isset($_GET['username'])) {
 
     $username = mysqli_real_escape_string($conn, $_GET['username']);
@@ -39,17 +53,41 @@ if (isset($_GET['username'])) {
     $result_stats = $stmt_stats->get_result();
     $row = $result_stats->fetch_assoc();
 
-    //pg - search
-
+    //pg - search -category
     $limit = 5;
     $page = isset($_GET['pg']) ? (int)$_GET['pg'] : 1;
 
     $search = isset($_GET['q']) ? trim($_GET['q']) : '';
     $search_param = "%$search%";
 
+    $category = isset($_GET['category']) ? $_GET['category'] : 'all';
+
     $offset = ($page - 1) * $limit;
 
-    $stmt_pg = $conn->prepare("
+    if ($row_admin['is_admin'] == "YES") {
+        $stmt_pg = $conn->prepare("
+    SELECT 
+        a.*, 
+        p.nama, 
+        p.username, 
+        p.photo,
+        c.nama AS category_name
+    FROM article a 
+    JOIN profile p 
+        ON a.id_profile = p.id_profile 
+    JOIN category c ON a.category_id = c.category_id
+    WHERE p.username = ? 
+    AND (a.title LIKE ?)
+    AND (? = 'all' OR a.category_id = ?)
+    ORDER BY a.created_at DESC 
+    LIMIT ? OFFSET ?
+");
+
+        $stmt_pg->bind_param("ssssii", $username, $search_param, $category, $category, $limit, $offset);
+        $stmt_pg->execute();
+        $result_pg = $stmt_pg->get_result();
+    } else {
+        $stmt_pg = $conn->prepare("
     SELECT 
         a.*, 
         p.nama, 
@@ -62,14 +100,16 @@ if (isset($_GET['username'])) {
     JOIN category c ON a.category_id = c.category_id
     WHERE p.username = ? 
     AND a.status = 'publish'
-    AND (a.title LIKE ? OR a.content LIKE ?)
+    AND (a.title LIKE ?)
+    AND (? = 'all' OR a.category_id = ?)
     ORDER BY a.created_at DESC 
     LIMIT ? OFFSET ?
 ");
 
-    $stmt_pg->bind_param("sssii", $username, $search_param, $search_param, $limit, $offset);
-    $stmt_pg->execute();
-    $result_pg = $stmt_pg->get_result();
+        $stmt_pg->bind_param("ssssii", $username, $search_param, $category, $category, $limit, $offset);
+        $stmt_pg->execute();
+        $result_pg = $stmt_pg->get_result();
+    }
 
     $total_query_pg = $conn->prepare("
     SELECT COUNT(*) as total 
@@ -78,10 +118,10 @@ if (isset($_GET['username'])) {
         ON a.id_profile = p.id_profile 
     WHERE p.username = ? 
     AND a.status = 'publish'
-    AND (a.title LIKE ? OR a.content LIKE ?)
+    AND (a.title LIKE ?)
 ");
 
-    $total_query_pg->bind_param("sss", $username, $search_param, $search_param);
+    $total_query_pg->bind_param("ss", $username, $search_param);
     $total_query_pg->execute();
     $result_total_pg = $total_query_pg->get_result();
 
@@ -89,14 +129,18 @@ if (isset($_GET['username'])) {
 
     $total_pages = ceil($total_data / $limit);
 
-
- 
+    $stmt_category = $conn->prepare("SELECT * FROM category");
+    $stmt_category->execute();
+    $result_category = $stmt_category->get_result();
 } else {
     header("Location: ../dashboard/?page=home");
     exit;
 }
 
+$range = 2;
 
+$start = max(1, $page - $range);
+$end = min($total_pages, $page + $range);
 ?>
 
 <div class="container my-4">
@@ -116,7 +160,7 @@ if (isset($_GET['username'])) {
                 <small class="text-muted">@<?php echo htmlspecialchars($row['username']); ?></small>
 
                 <div class="mt-2 d-flex gap-4">
-                    <div><strong><?php echo $row['article_count'] ?? 0; ?></strong> Articles</div>
+                    <div><strong><?php echo $row['article_count'] ?? 0; ?> </strong> Articles  <small style="color: green;"><?=  $row_admin['is_admin'] == "YES" ? " (Published)" : "" ?></small></div>
                     <div><strong><?php echo $row['total_likes'] ?? 0; ?></strong> Likes</div>
                     <div><strong><?php echo $row['total_views'] ?? 0; ?></strong> Views</div>
                 </div>
@@ -137,24 +181,40 @@ if (isset($_GET['username'])) {
     <!-- ARTICLES -->
     <div class="card p-3 shadow-sm">
 
-        <div style="display: flex;flex-direction: row;flex-wrap: wrap;justify-content: space-between;">
-            <h5 class="mb-3">Articles</h5>
-            <form method="GET" class="mb-3">
+        <div class="d-flex align-items-center mb-3">
+
+            <h5 class="mb-0">Articles</h5>
+
+            <!-- FORM DI KANAN -->
+            <form method="GET" class="d-flex gap-2 align-items-center ms-auto" style="width: 700px;">
+
                 <input type="hidden" name="page" value="read">
                 <input type="hidden" name="action" value="profile">
                 <input type="hidden" name="username" value="<?= $username ?>">
                 <input type="hidden" name="pg" value="1">
 
-                <div class="input-group">
-                    <input type="text" name="q" class="form-control"
-                        placeholder="Cari artikel..."
-                        value="<?= htmlspecialchars($search) ?>">
+                <!-- CATEGORY -->
+                <select class="form-select" id="category-search" name="category" style="width: 600px;">
+                    <option value="all">All Category</option>
+                    <?php while ($row_category = $result_category->fetch_assoc()) { ?>
+                        <option value="<?= $row_category['category_id'] ?>" <?= ($category == $row_category['category_id']) ? 'selected' : '' ?>>
+                            <?= $row_category['nama'] ?>
+                        </option>
+                    <?php } ?>
+                </select>
 
-                    <button class="btn btn-primary" type="submit">
-                        Search
-                    </button>
-                </div>
+                <!-- INPUT -->
+                <input type="text" name="q" class="form-control flex-grow-1"
+                    placeholder="Cari artikel..."
+                    value="<?= htmlspecialchars($search) ?>">
+
+                <!-- BUTTON -->
+                <button class="btn btn-primary px-3">
+                    Search
+                </button>
+
             </form>
+
         </div>
         <!-- ITEM -->
 
@@ -189,6 +249,12 @@ if (isset($_GET['username'])) {
                             <div class="mt-2 d-flex gap-3">
                                 <small>👍 <?php echo $row_article['likes'] ?? 0; ?></small>
                                 <small>👁 <?php echo $row_article['views'] ?? 0; ?></small>
+                                <?php
+                                if ($row_admin['is_admin'] == "YES") { ?>
+                                    <small> <?php echo $row_article['status']; ?><small style="color: red;"> <?=  $row_article['is_takedown'] == "YES" ? " (Takedown)" : ""; ?> </small></small>
+                                <?php }
+                                ?>
+
                             </div>
 
                         </div>
@@ -207,6 +273,7 @@ if (isset($_GET['username'])) {
         <?php }
         } ?>
         <!-- PAGINATION -->
+
         <nav>
             <ul class="pagination justify-content-center">
 
@@ -215,12 +282,32 @@ if (isset($_GET['username'])) {
                     <a class="page-link" href="?page=read&action=profile&username=<?= $username ?>&pg=<?= $page - 1 ?>&q=<?= urldecode($search) ?>">Previous</a>
                 </li>
 
-                <!-- PAGE NUMBER -->
-                <?php for ($i = 1; $i <= $total_pages; $i++) : ?>
+                <!-- FIRST -->
+                <?php if ($start > 1): ?>
+                    <li class="page-item"><a class="page-link" href="?page=read&action=profile&username=<?= $username ?>&pg=1&q=<?= urldecode($search) ?>">1</a></li>
+                    <?php if ($start > 2): ?>
+                        <li class="page-item disabled"><span class="page-link">...</span></li>
+                    <?php endif; ?>
+                <?php endif; ?>
+
+                <!-- MIDDLE -->
+                <?php for ($i = $start; $i <= $end; $i++): ?>
                     <li class="page-item <?= ($i == $page) ? 'active' : '' ?>">
-                        <a class="page-link" href="?page=read&action=profile&username=<?= $username ?>&pg=<?= $i ?>&q=<?= urldecode($search) ?>"><?= $i ?></a>
+                        <a class="page-link" href="?page=read&action=profile&username=<?= $username ?>&pg=<?= $i ?>&q=<?= urldecode($search) ?>">
+                            <?= $i ?>
+                        </a>
                     </li>
                 <?php endfor; ?>
+
+                <!-- LAST -->
+                <?php if ($end < $total_pages): ?>
+                    <?php if ($end < $total_pages - 1): ?>
+                        <li class="page-item disabled"><span class="page-link">...</span></li>
+                    <?php endif; ?>
+                    <li class="page-item">
+                        <a class="page-link" href="?page=read&action=profile&username=<?= $username ?>&pg=<?= $total_pages ?>&q=<?= urldecode($search) ?>"><?= $total_pages ?></a>
+                    </li>
+                <?php endif; ?>
 
                 <!-- NEXT -->
                 <li class="page-item <?= ($page >= $total_pages) ? 'disabled' : '' ?>">
@@ -229,6 +316,7 @@ if (isset($_GET['username'])) {
 
             </ul>
         </nav>
+
 
     </div>
 
