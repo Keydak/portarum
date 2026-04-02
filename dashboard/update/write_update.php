@@ -179,7 +179,7 @@ if (isset($_POST['Update'])) {
                         text: "Ada field yang kosong!",
                         icon: "error"
                     }).then(() => {
-                            window.location.href = "./?page=create&action=write";
+                            window.location.href = "./?page=update&action=edit_blog&id=' . $blog_id . '";
                         });
                 </script>';
         exit;

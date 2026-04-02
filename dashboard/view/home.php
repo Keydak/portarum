@@ -32,14 +32,17 @@ $row_algoritma = $result_algoritma->fetch_assoc();
 
 $stmt_random = $conn->prepare("SELECT 
     a.*,
-    p.nama
-FROM article a JOIN profile p ON a.id_profile = p.id_profile
+    p.nama,
+     c.nama AS category_name
+FROM article a 
+JOIN profile p ON a.id_profile = p.id_profile
+JOIN category c ON a.category_id = c.category_id
 WHERE a.status='publish'
 AND a.is_takedown='NO'
 AND a.article_id >= (
     SELECT FLOOR(RAND() * (SELECT MAX(article_id) FROM article))
 )
-LIMIT 6");
+LIMIT 5");
 $stmt_random->execute();
 $result_random = $stmt_random->get_result();
 $row_random = $result_random->fetch_assoc();
@@ -48,6 +51,7 @@ $stmt_random_user = $conn->prepare("SELECT
     p.nama,
     p.username,
     p.photo,
+    p.is_admin,
     p.UUID FROM profile p
 WHERE p.id_profile >= (
     SELECT FLOOR(RAND() * (SELECT MAX(id_profile) FROM profile))
@@ -143,8 +147,8 @@ $end = min($total_pages, $page + $range);
                         $result_category = $stmt_category->get_result();
 
                         while ($row_category = $result_category->fetch_assoc()) { ?>
-                        <option value="<?= $row_category['category_id'] ?>" <?= ($category == $row_category['category_id']) ? 'selected' : '' ?>><?= $row_category['nama'] ?></option>
-                      <?php } 
+                            <option value="<?= $row_category['category_id'] ?>" <?= ($category == $row_category['category_id']) ? 'selected' : '' ?>><?= $row_category['nama'] ?></option>
+                        <?php }
                         ?>
                     </select>
                 </div>
@@ -161,6 +165,19 @@ $end = min($total_pages, $page + $range);
 
     <div style="max-width:800px;">
         <h5 class="fw-bold mb-3">Berita Terpopuler</h5>
+
+        <?php if ($total_data == 0) { ?>
+            <div class="d-flex justify-content-center my-5">
+                <div class="card shadow-sm border-0 text-center p-4" style="max-width: 400px;">
+                    <div class="card-body">
+                        <h5 class="fw-bold mb-2">Belum Ada Article Yang Populer</h5>
+                        <p class="text-muted mb-3">
+                            Tidak ada article yang populer
+                        </p>
+                    </div>
+                </div>
+            </div>
+        <?php } ?>
 
         <!-- Item -->
         <?php foreach ($result_pg as $row_algoritma) {
@@ -234,48 +251,48 @@ $end = min($total_pages, $page + $range);
         <?php } ?>
 
 
-            <nav>
-                <ul class="pagination justify-content-center">
+        <nav>
+            <ul class="pagination justify-content-center">
 
-                    <!-- PREVIOUS -->
-                    <li class="page-item <?= ($page <= 1) ? 'disabled' : '' ?>">
-                        <a class="page-link" href="?page=home&pg=<?= $page - 1 ?>&q=<?= urldecode($search) ?>&category=<?= urldecode($category) ?>">Previous</a>
-                    </li>
+                <!-- PREVIOUS -->
+                <li class="page-item <?= ($page <= 1) ? 'disabled' : '' ?>">
+                    <a class="page-link" href="?page=home&pg=<?= $page - 1 ?>&q=<?= urldecode($search) ?>&category=<?= urldecode($category) ?>">Previous</a>
+                </li>
 
-                    <!-- FIRST -->
-                    <?php if ($start > 1): ?>
-                        <li class="page-item"><a class="page-link" href="?page=home&pg=1&q=<?= urldecode($search) ?>&category=<?= urldecode($category) ?>">1</a></li>
-                        <?php if ($start > 2): ?>
-                            <li class="page-item disabled"><span class="page-link">...</span></li>
-                        <?php endif; ?>
+                <!-- FIRST -->
+                <?php if ($start > 1): ?>
+                    <li class="page-item"><a class="page-link" href="?page=home&pg=1&q=<?= urldecode($search) ?>&category=<?= urldecode($category) ?>">1</a></li>
+                    <?php if ($start > 2): ?>
+                        <li class="page-item disabled"><span class="page-link">...</span></li>
                     <?php endif; ?>
+                <?php endif; ?>
 
-                    <!-- MIDDLE -->
-                    <?php for ($i = $start; $i <= $end; $i++): ?>
-                        <li class="page-item <?= ($i == $page) ? 'active' : '' ?>">
-                            <a class="page-link" href="?page=home&pg=<?= $i ?>&q=<?= urldecode($search) ?>&category=<?= urldecode($category) ?>">
-                                <?= $i ?>
-                            </a>
-                        </li>
-                    <?php endfor; ?>
-
-                    <!-- LAST -->
-                    <?php if ($end < $total_pages): ?>
-                        <?php if ($end < $total_pages - 1): ?>
-                            <li class="page-item disabled"><span class="page-link">...</span></li>
-                        <?php endif; ?>
-                        <li class="page-item">
-                            <a class="page-link" href="?page=home&pg=<?= $total_pages ?>&q=<?= urldecode($search) ?>&category=<?= urldecode($category) ?>"><?= $total_pages ?></a>
-                        </li>
-                    <?php endif; ?>
-
-                    <!-- NEXT -->
-                    <li class="page-item <?= ($page >= $total_pages) ? 'disabled' : '' ?>">
-                        <a class="page-link" href="?page=home&pg=<?= $page + 1 ?>&q=<?= urldecode($search) ?>&category=<?= urldecode($category) ?>">Next</a>
+                <!-- MIDDLE -->
+                <?php for ($i = $start; $i <= $end; $i++): ?>
+                    <li class="page-item <?= ($i == $page) ? 'active' : '' ?>">
+                        <a class="page-link" href="?page=home&pg=<?= $i ?>&q=<?= urldecode($search) ?>&category=<?= urldecode($category) ?>">
+                            <?= $i ?>
+                        </a>
                     </li>
+                <?php endfor; ?>
 
-                </ul>
-            </nav>
+                <!-- LAST -->
+                <?php if ($end < $total_pages): ?>
+                    <?php if ($end < $total_pages - 1): ?>
+                        <li class="page-item disabled"><span class="page-link">...</span></li>
+                    <?php endif; ?>
+                    <li class="page-item">
+                        <a class="page-link" href="?page=home&pg=<?= $total_pages ?>&q=<?= urldecode($search) ?>&category=<?= urldecode($category) ?>"><?= $total_pages ?></a>
+                    </li>
+                <?php endif; ?>
+
+                <!-- NEXT -->
+                <li class="page-item <?= ($page >= $total_pages) ? 'disabled' : '' ?>">
+                    <a class="page-link" href="?page=home&pg=<?= $page + 1 ?>&q=<?= urldecode($search) ?>&category=<?= urldecode($category) ?>">Next</a>
+                </li>
+
+            </ul>
+        </nav>
     </div>
 </div>
 
@@ -289,16 +306,32 @@ $end = min($total_pages, $page + $range);
                 <div class="border-bottom pb-2">
                     <h6 class="fw-bold mb-3">Random</h6>
 
+                    <?php if ($total_data == 0) { ?>
+                        <div class="d-flex justify-content-center my-5">
+                            <div class="card shadow-sm border-0 text-center p-4" style="max-width: 400px;">
+                                <div class="card-body">
+                                    <h5 class="fw-bold mb-2">Tidak ada article</h5>
+                                    <p class="text-muted mb-3">
+                                        Belum Ada Article Yang Dipublish
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    <?php } ?>
+
                     <!-- ITEM -->
                     <?php foreach ($result_random as $row_random) { ?>
                         <div class="d-flex mb-3 align-items-start rekom-item" onclick="window.open('?page=read&action=readarticle&id=<?= $row_random['UUID'] ?>','_self')" style="cursor:pointer;">
 
                             <!-- IMAGE -->
-                            <div style="width:100px; height:60px; overflow:hidden; border-radius:6px; object-fit: cover;">
-                                <img src="../assets/image/thumbnail/<?= $row_random['thumbnail'] ?>"
-                                    style="width:100%; height:100%; object-fit:cover;">
-                            </div>
 
+
+                            <div class="col-4 d-flex justify-content-end">
+                                <div style="width:100px; height:70px; overflow:hidden; border-radius:6px;">
+                                    <img src="../assets/image/thumbnail/<?= $row_random['thumbnail'] ?>"
+                                        style="width:100%; height:100%; object-fit: cover;">
+                                </div>
+                            </div>
                             <!-- CONTENT -->
                             <div class="ms-2">
 
@@ -309,7 +342,7 @@ $end = min($total_pages, $page + $range);
 
                                 <!-- META -->
                                 <small class="text-muted">
-                                    <?= $row_random['nama'] ?> • 👁️ <?= $row_random['views'] ?? 0 ?>
+                                    <?= $row_random['nama'] ?> • <?= $row_random['category_name'] ?> • 👁️ <?= $row_random['views'] ?? 0 ?>
                                 </small>
 
                             </div>
@@ -323,7 +356,7 @@ $end = min($total_pages, $page + $range);
                     <?php
 
                     foreach ($result_random_user as $row_random_user) {
-                        if ($row_random_user['UUID'] === $_SESSION['id']) continue;
+                        if ($row_random_user['UUID'] === $_SESSION['id'] || $row_random_user['is_admin'] == "YES") continue;
                     ?>
 
                         <div class="d-flex align-item s-center justify-content-between mb-3 p-2 rounded hover-shadow" onclick="window.open('?page=read&action=profile&username=<?= $row_random_user['username'] ?>','_self')" style="cursor:pointer;">
@@ -347,7 +380,6 @@ $end = min($total_pages, $page + $range);
 
                             </div>
 
-                            <!-- RIGHT -->
 
                         </div>
 

@@ -37,9 +37,9 @@ $row_user = $result_user->fetch_assoc();
   <link rel="stylesheet" href="../assets/css/datatables.min.css">
   <script src="../assets/js/datatables.min.js"></script>
 
+  <link rel="stylesheet" href="../assets/css/font-awesome.min.css">
   <link rel="stylesheet" href="../assets/css/select2.min.css">
   <script src="../assets/js/select2.min.js"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
     body {
       background: #f8f9fa;

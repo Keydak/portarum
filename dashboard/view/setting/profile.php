@@ -116,7 +116,9 @@ if (isset($_POST["Update_password"])) {
                     title: "Gagal!",
                     text: "Password lama salah!",
                     icon: "error"
-                });
+                }).then(() => {
+                window.location.href = "?page=setting&action=profile";
+            });
             </script>';
             exit;
         }
@@ -190,7 +192,7 @@ if (isset($_POST['Update'])) {
             text: "Berhasil Update Data!",
             icon: "success"
         }).then(() => {
-            window.location.href = "./?page=setting&action=library";
+            window.location.href = "./?page=setting&action=profile";
         });
     </script>';
                     exit;

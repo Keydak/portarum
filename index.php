@@ -3,10 +3,10 @@
 include "./config/koneksi.php";
 
 if (isset($_SESSION['id'])) { ?>
-   <script>
+  <script>
     window.location.href = "./dashboard/index.php";
-   </script>
- 
+  </script>
+
 <?php }
 
 ?>
@@ -20,6 +20,8 @@ if (isset($_SESSION['id'])) { ?>
   <title>Portarum - Writeup & Tech Blog</title>
   <link rel="stylesheet" href="./assets/css/bootstrap-5-3-2.css">
   <link rel="stylesheet" href="./assets/css/sweetalert.min.css">
+  <link rel="stylesheet" href="./assets/css/font-awesome.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
     body {
       background: #f8f9fa;
@@ -40,6 +42,21 @@ if (isset($_SESSION['id'])) { ?>
 
     footer {
       font-size: 14px;
+    }
+
+    .toggle-password {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      user-select: none;
+      font-size: 18px;
+      color: #6c757d;
+    }
+
+    .toggle-password:hover {
+      color: #000;
     }
   </style>
 </head>
@@ -90,12 +107,162 @@ if (isset($_SESSION['id'])) { ?>
         </div>
 
         <div class="col-md-6 text-center">
-          <img src="https://via.placeholder.com/500x300" class="img-fluid rounded">
+          <img src="./assets/image/index/hero.jpg" class="img-fluid rounded">
         </div>
 
       </div>
     </div>
   </section>
+
+
+
+  <!-- ABOUT -->
+  <section class="container my-5">
+    <div class="text-center mb-5">
+      <h3 class="fw-bold">Apa itu Portarum?</h3>
+      <p class="text-muted">Platform blog terbuka untuk semua topik</p>
+    </div>
+
+    <div class="row text-center">
+
+      <div class="col-md-4">
+        <h5>✍️ Tulis Apa Saja</h5>
+        <p class="text-muted">
+          Buat artikel tentang topik apa pun—teknologi, pengalaman, opini, atau tutorial.
+        </p>
+      </div>
+
+      <div class="col-md-4">
+        <h5>🌍 Berbagi dengan Dunia</h5>
+        <p class="text-muted">
+          Publikasikan tulisanmu dan biarkan orang lain membaca serta belajar darinya.
+        </p>
+      </div>
+
+      <div class="col-md-4">
+        <h5>📚 Eksplorasi Konten</h5>
+        <p class="text-muted">
+          Temukan berbagai artikel menarik dari penulis lain dengan topik yang beragam.
+        </p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ARTIKEL -->
+  <section class="container my-5">
+    <h4 class="fw-bold mb-4">Artikel Yang Mungkin Anda Suka</h4>
+
+    <div class="row g-4">
+
+      <!-- FEATURED (besar) -->
+      <div class="col-lg-6" data-bs-toggle="modal" data-bs-target="#authModal" style="cursor:pointer;">
+        <div class="card border-0 shadow-sm h-100">
+          <img src="./assets/image/index/1-Membangun-Personal-Branding.webp" class="card-img-top" style="height:250px; object-fit:cover;">
+          <div class="card-body">
+            <h5 class="fw-bold">
+              Cara Membangun Personal Branding Lewat Blog
+            </h5>
+            <p class="text-muted small">
+              Tips membangun identitas digital melalui tulisan dan konten berkualitas.
+            </p>
+            <small class="text-muted">Lifestyle • 5 menit baca</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT LIST -->
+      <div class="col-lg-6">
+
+        <div class="d-flex mb-4" data-bs-toggle="modal" data-bs-target="#authModal" style="cursor:pointer;">
+          <div style="width:150px; height:100px; overflow:hidden; border-radius:6px;">
+            <img src="./assets/image/index/php-laravel-code-snippet.jpg"
+              style="width:100%; height:100%; object-fit:fill;">
+          </div>
+          <div class="ms-3">
+            <h6 class="mb-1">Belajar Laravel untuk Pemula</h6>
+            <small class="text-muted">Programming • 8 menit baca</small>
+          </div>
+        </div>
+
+        <div class="d-flex mb-4" data-bs-toggle="modal" data-bs-target="#authModal" style="cursor:pointer;">
+          <div style="width:150px; height:100px; overflow:hidden; border-radius:6px;">
+            <img src="./assets/image/index/foto_artikel.jpg"
+              style="width:100%; height:100%; object-fit:cover;">
+          </div>
+          <div class="ms-3">
+            <h6 class="mb-1">Tips Menulis Artikel yang Menarik</h6>
+            <small class="text-muted">Writing • 4 menit baca</small>
+          </div>
+        </div>
+
+        <div class="d-flex" data-bs-toggle="modal" data-bs-target="#authModal" style="cursor:pointer;">
+          <div style="width:150px; height:100px; overflow:hidden; border-radius:6px;">
+            <img src="./assets/image/index/tips-menulis-cepat-artikel-ilmiah.jpg"
+              style="width:100%; height:100%; object-fit:cover;">
+          </div>
+          <div class="ms-3">
+            <h6 class="mb-1">Cara Konsisten Menulis Setiap Hari</h6>
+            <small class="text-muted">Productivity • 6 menit baca</small>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="bg-white py-5 mt-5 border-top">
+    <div class="container text-center">
+      <h4 class="fw-bold mb-3">Mulai Bangun Portofolio Kamu</h4>
+      <p class="text-muted">
+        Tulis pengalaman bug hunting, share tutorial, dan bantu komunitas berkembang.
+      </p>
+      <a data-bs-toggle="modal" data-bs-target="#authModal" class="btn btn-primary">Mulai Sekarang</a>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="bg-white border-top mt-5 pt-4 pb-3">
+    <div class="container">
+      <div class="row">
+
+        <div class="col-md-6 mb-3">
+          <h5 class="fw-bold">Portarum</h5>
+          <p class="text-muted">
+            Platform artikel dan blog tempat pengguna berbagi berbagai cerita, ide, dan pengetahuan.
+          </p>
+        </div>
+
+        <div class="col-md-3 mb-3">
+          <h6 class="fw-bold">Kategori</h6>
+          <ul class="list-unstyled">
+            <li><a href="#" class="text-decoration-none text-muted">Gaming</a></li>
+            <li><a href="#" class="text-decoration-none text-muted">Programming</a></li>
+            <li><a href="#" class="text-decoration-none text-muted">Tech</a></li>
+          </ul>
+        </div>
+
+        <div class="col-md-3 mb-3">
+          <h6 class="fw-bold">Informasi</h6>
+          <ul class="list-unstyled">
+            <li><a href="#" class="text-decoration-none text-muted">Tentang</a></li>
+            <li><a href="#" class="text-decoration-none text-muted">Kontak</a></li>
+            <li><a href="#" class="text-decoration-none text-muted">Privasi</a></li>
+          </ul>
+        </div>
+
+
+      </div>
+
+      <div class="text-center border-top pt-3 mt-3">
+        <small class="text-muted">
+          © <?= date("Y") ?> Portarum. All rights reserved.
+        </small>
+      </div>
+    </div>
+  </footer>
 
   <!-- MODAL AUTH -->
   <div class="modal fade" id="authModal" tabindex="-1">
@@ -159,12 +326,20 @@ if (isset($_SESSION['id'])) { ?>
                   <input type="text" class="form-control" placeholder="Username" name="username">
                 </div>
 
-                <div class="mb-3">
-                  <input type="password" class="form-control" placeholder="Password" name="password">
+                <div class="mb-3 position-relative">
+                  <input type="password" class="form-control pe-5" id="password" name="password" placeholder="Password">
+
+                  <i class="fa-solid fa-eye toggle-password" onclick="togglePassword('password', this)"></i>
+
+                  <small id="passwordError" class="text-danger"></small>
                 </div>
 
-                <div class="mb-3">
-                  <input type="password" class="form-control" placeholder="Ulangi Password" name="confirm_password">
+                <div class="mb-3 position-relative">
+                  <input type="password" class="form-control pe-5" id="confirm_password" name="confirm_password" placeholder="Ulangi Password">
+
+                  <i class="fa-solid fa-eye toggle-password toggle-password2" onclick="togglePassword('confirm_password', this)"></i>
+
+                  <small id="confirmError" class="text-danger"></small>
                 </div>
 
                 <button class="btn btn-success w-100" type="submit" name="signup">Register</button>
@@ -178,168 +353,63 @@ if (isset($_SESSION['id'])) { ?>
       </div>
     </div>
   </div>
-
-  <!-- ABOUT -->
-  <section class="container my-5">
-    <div class="text-center mb-5">
-      <h3 class="fw-bold">Apa itu Portarum?</h3>
-      <p class="text-muted">Platform blog terbuka untuk semua topik</p>
-    </div>
-
-    <div class="row text-center">
-
-      <div class="col-md-4">
-        <h5>✍️ Tulis Apa Saja</h5>
-        <p class="text-muted">
-          Buat artikel tentang topik apa pun—teknologi, pengalaman, opini, atau tutorial.
-        </p>
-      </div>
-
-      <div class="col-md-4">
-        <h5>🌍 Berbagi dengan Dunia</h5>
-        <p class="text-muted">
-          Publikasikan tulisanmu dan biarkan orang lain membaca serta belajar darinya.
-        </p>
-      </div>
-
-      <div class="col-md-4">
-        <h5>📚 Eksplorasi Konten</h5>
-        <p class="text-muted">
-          Temukan berbagai artikel menarik dari penulis lain dengan topik yang beragam.
-        </p>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- ARTIKEL -->
-  <section class="container my-5">
-    <h4 class="fw-bold mb-4">Artikel Terbaru</h4>
-
-    <div class="row g-4">
-
-      <!-- FEATURED (besar) -->
-      <div class="col-lg-6">
-        <div class="card border-0 shadow-sm h-100">
-          <img src="https://via.placeholder.com/600x300" class="card-img-top" style="height:250px; object-fit:cover;">
-          <div class="card-body">
-            <h5 class="fw-bold">
-              Cara Membangun Personal Branding Lewat Blog
-            </h5>
-            <p class="text-muted small">
-              Tips membangun identitas digital melalui tulisan dan konten berkualitas.
-            </p>
-            <small class="text-muted">Lifestyle • 5 menit baca</small>
-          </div>
-        </div>
-      </div>
-
-      <!-- RIGHT LIST -->
-      <div class="col-lg-6">
-
-        <div class="d-flex mb-4">
-          <div style="width:120px; height:80px; overflow:hidden; border-radius:6px;">
-            <img src="https://via.placeholder.com/300x150"
-              style="width:100%; height:100%; object-fit:cover;">
-          </div>
-          <div class="ms-3">
-            <h6 class="mb-1">Belajar Laravel untuk Pemula</h6>
-            <small class="text-muted">Programming • 8 menit baca</small>
-          </div>
-        </div>
-
-        <div class="d-flex mb-4">
-          <div style="width:120px; height:80px; overflow:hidden; border-radius:6px;">
-            <img src="https://via.placeholder.com/300x150"
-              style="width:100%; height:100%; object-fit:cover;">
-          </div>
-          <div class="ms-3">
-            <h6 class="mb-1">Tips Menulis Artikel yang Menarik</h6>
-            <small class="text-muted">Writing • 4 menit baca</small>
-          </div>
-        </div>
-
-        <div class="d-flex">
-          <div style="width:120px; height:80px; overflow:hidden; border-radius:6px;">
-            <img src="https://via.placeholder.com/300x150"
-              style="width:100%; height:100%; object-fit:cover;">
-          </div>
-          <div class="ms-3">
-            <h6 class="mb-1">Cara Konsisten Menulis Setiap Hari</h6>
-            <small class="text-muted">Productivity • 6 menit baca</small>
-          </div>
-        </div>
-
-      </div>
-
-    </div>
-  </section>
-
-  <!-- CTA -->
-  <section class="bg-white py-5 mt-5 border-top">
-    <div class="container text-center">
-      <h4 class="fw-bold mb-3">Mulai Bangun Portofolio Kamu</h4>
-      <p class="text-muted">
-        Tulis pengalaman bug hunting, share tutorial, dan bantu komunitas berkembang.
-      </p>
-      <a data-bs-toggle="modal" data-bs-target="#authModal" class="btn btn-primary">Mulai Sekarang</a>
-    </div>
-  </section>
-
-  <!-- FOOTER -->
-  <footer class="bg-white border-top mt-5 pt-4 pb-3">
-    <div class="container">
-      <div class="row">
-
-        <div class="col-md-4 mb-3">
-          <h5 class="fw-bold">Portarum</h5>
-          <p class="text-muted">
-            Platform artikel dan blog tempat pengguna berbagi berbagai cerita, ide, dan pengetahuan.
-          </p>
-        </div>
-
-        <div class="col-md-2 mb-3">
-          <h6 class="fw-bold">Kategori</h6>
-          <ul class="list-unstyled">
-            <li><a href="#" class="text-decoration-none text-muted">Bug Hunting</a></li>
-            <li><a href="#" class="text-decoration-none text-muted">Programming</a></li>
-            <li><a href="#" class="text-decoration-none text-muted">Tech</a></li>
-          </ul>
-        </div>
-
-        <div class="col-md-3 mb-3">
-          <h6 class="fw-bold">Informasi</h6>
-          <ul class="list-unstyled">
-            <li><a href="#" class="text-decoration-none text-muted">Tentang</a></li>
-            <li><a href="#" class="text-decoration-none text-muted">Kontak</a></li>
-            <li><a href="#" class="text-decoration-none text-muted">Privasi</a></li>
-          </ul>
-        </div>
-
-        <div class="col-md-3 mb-3">
-          <h6 class="fw-bold">Newsletter</h6>
-          <div class="input-group">
-            <input type="email" class="form-control" placeholder="Email">
-            <button class="btn btn-primary">Subscribe</button>
-          </div>
-        </div>
-
-      </div>
-
-      <div class="text-center border-top pt-3 mt-3">
-        <small class="text-muted">
-          © 2025 Portarum. All rights reserved.
-        </small>
-      </div>
-    </div>
-  </footer>
-
   <script src="./assets/js/jquery.min.js"></script>
   <script src="./assets/js/sweetalert.min.js"></script>
   <script src="./assets/js/bootstrap-5-3-2.js"></script>
 
 
+  <script>
+    const password = document.getElementById('password');
+    const confirmPassword = document.getElementById('confirm_password');
+    const toggle_password = document.querySelector('.toggle-password');
+    const toggle_password2 = document.querySelector('.toggle-password2');
 
+    const passwordError = document.getElementById('passwordError');
+    const confirmError = document.getElementById('confirmError');
+
+    function validatePassword() {
+      const value = password.value;
+
+      const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+
+      if (!regex.test(value)) {
+        passwordError.textContent = "Minimal 8 karakter, ada huruf besar, kecil, dan angka";
+        toggle_password.style.transform = "translateY(-120%)";
+
+      } else {
+        passwordError.textContent = "";
+        toggle_password.style.transform = "";
+
+      }
+
+      if (confirmPassword.value && confirmPassword.value !== value) {
+        confirmError.textContent = "Password tidak sama";
+        toggle_password2.style.transform = "translateY(-120%)";
+      } else {
+        confirmError.textContent = "";
+        toggle_password2.style.transform = "";
+      }
+    }
+
+
+    function togglePassword(inputId, icon) {
+      const input = document.getElementById(inputId);
+
+      if (input.type === "password") {
+        input.type = "text";
+        icon.classList.remove("fa-eye");
+        icon.classList.add("fa-eye-slash");
+      } else {
+        input.type = "password";
+        icon.classList.remove("fa-eye-slash");
+        icon.classList.add("fa-eye");
+      }
+    }
+
+
+    password.addEventListener('input', validatePassword);
+    confirmPassword.addEventListener('input', validatePassword);
+  </script>
 
 </body>
 
@@ -348,7 +418,7 @@ if (isset($_SESSION['id'])) { ?>
 <?php
 
 if (isset($_POST["signin"])) {
-  $username = mysqli_real_escape_string($conn, strtolower($_POST["username"]));
+  $username = strtolower(mysqli_real_escape_string($conn, strtolower($_POST["username"])));
   $password = mysqli_real_escape_string($conn, $_POST['password']);
 
   $stmt_login = $conn->prepare("SELECT username,password,UUID FROM profile WHERE username = ?");
@@ -359,8 +429,8 @@ if (isset($_POST["signin"])) {
   if ($result_login->num_rows === 1) {
     $row = mysqli_fetch_assoc($result_login);
     if (password_verify($password, $row['password'])) {
-        $_SESSION["id"] = $row['UUID'];
-       echo '<script>
+      $_SESSION["id"] = $row['UUID'];
+      echo '<script>
         Swal.fire({
         title: "Login Berhasil!",
         text: "Selamat datang di Portarum!",
@@ -388,7 +458,7 @@ if (isset($_POST["signin"])) {
     </script>';
   }
 } elseif (isset($_POST['signup'])) {
-  $username = mysqli_real_escape_string($conn, ($_POST["username"]));
+  $username = strtolower(mysqli_real_escape_string($conn, ($_POST["username"])));
   $password = mysqli_real_escape_string($conn, $_POST['password']);
   $confirm_password = mysqli_real_escape_string($conn, $_POST['confirm_password']);
   $nama = mysqli_real_escape_string($conn, $_POST['nama']);
@@ -397,6 +467,28 @@ if (isset($_POST["signin"])) {
   $stmt_register->bind_param("s", $username);
   $stmt_register->execute();
   $result_register = $stmt_register->get_result();
+
+  if (empty($username) || empty($password) || empty($confirm_password) || empty($nama)) {
+    echo '<script>
+        Swal.fire({
+        title: "Pendaftaran Gagal!",
+        text: "Mohon lengkapi semua field!",
+        icon: "error"
+        });
+    </script>';
+    return;
+  }
+
+  if (!preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/', $password)) {
+    echo '<script>
+        Swal.fire({
+        title: "Pendaftaran Gagal!",
+        text: "Password tidak memenuhi standar!",
+        icon: "error"
+        });
+    </script>';
+    return;
+  }
 
   if ($result_register->num_rows === 1) {
     echo '<script>

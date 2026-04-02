@@ -112,13 +112,12 @@ if ($activity == "liked") {
     FROM article a 
     JOIN profile p 
         ON a.id_profile = p.id_profile
-    JOIN article_like al ON a.article_id = al.article_id
-    WHERE a.status = 'draft' AND a.is_takedown = 'YES'
+    WHERE a.is_takedown = 'YES'
     AND (a.title LIKE ?)
     AND (? = 'all' OR a.category_id = ?)
-    AND al.id_profile = ?
 ");
-    $total_query_pg->bind_param("sssi", $search_param, $category, $category, $row['id_profile']);
+    $total_query_pg->bind_param("sss", $search_param, $category, $category);
+    
 }
 
 $total_query_pg->execute();
@@ -207,6 +206,20 @@ $end = min($total_pages, $page + $range);
             </ul>
 
             <?php if ($activity === 'liked') { ?>
+
+                <?php if ($total_data == 0) { ?>
+                    <div class="d-flex justify-content-center my-5">
+                        <div class="card shadow-sm border-0 text-center p-4" style="max-width: 400px;">
+                            <div class="card-body">
+                                <h5 class="fw-bold mb-2">Anda Harus Like Article </h5>
+                                <p class="text-muted mb-3">
+                                    Anda Belum Like 1-pun Article
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                <?php } ?>
+
                 <?php
 
                 foreach ($result_activity as $row_activity_loop) {
@@ -242,8 +255,24 @@ $end = min($total_pages, $page + $range);
                     </div>
 
                 <?php }  ?>
-                <?php  } else {
-                foreach ($result_activity_takedown as $row_activity_loop_takedown) {
+
+
+                <?php  } else { ?>
+
+                       <?php if ($total_data == 0) { ?>
+                    <div class="d-flex justify-content-center my-5">
+                        <div class="card shadow-sm border-0 text-center p-4" style="max-width: 400px;">
+                            <div class="card-body">
+                                <h5 class="fw-bold mb-2">Anda Tidak Men-takedown Article Orang lain </h5>
+                                <p class="text-muted mb-3">
+                                    Takedown setidaknya 1 article dan lihat datanya disini
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                <?php } ?>
+
+              <?php  foreach ($result_activity_takedown as $row_activity_loop_takedown) {
 
                 ?>
                     <div class="d-flex mb-3 pb-3 border-bottom align-items-center"
@@ -366,12 +395,25 @@ $end = min($total_pages, $page + $range);
 
 
             <div>
-
+                <?php if ($total_data == 0) { ?>
+                    <div class="d-flex justify-content-center my-5">
+                        <div class="card shadow-sm border-0 text-center p-4" style="max-width: 400px;">
+                            <div class="card-body">
+                                <h5 class="fw-bold mb-2">Anda Harus Like Article </h5>
+                                <p class="text-muted mb-3">
+                                    Anda Belum Like 1-pun Article
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                <?php } ?>
                 <?php
 
                 foreach ($result_activity as $row_activity_loop) {
 
                 ?>
+
+
                     <div class="d-flex mb-3 pb-3 border-bottom align-items-center"
                         onclick="window.location.href='?page=read&id=1'"
                         style="cursor:pointer;">

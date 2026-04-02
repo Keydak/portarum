@@ -158,7 +158,7 @@ if (isset($_POST['create'])) {
                         text: "Blog berhasil dibuat!",
                         icon: "success"
                     }).then(() => {
-                        window.location.href = "./?page=read&action=library";
+                        window.location.href = "./?page=setting&action=library";
                     });
                 </script>';
                         exit;

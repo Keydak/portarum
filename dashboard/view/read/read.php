@@ -177,14 +177,18 @@ if (isset($_POST['untakedown']) && $row_admin['is_admin'] === "YES") {
     <?php
     if ($row_admin['is_admin'] === "YES" && $row['is_takedown'] === 'YES') { ?>
         <div class="alert alert-danger" role="alert">
-            <i class="fa-solid fa-triangle-exclamation me-2"></i>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" style="width: 25px;">
+                <path d="M431.2 476.5L163.5 208.8C141.1 240.2 128 278.6 128 320C128 426 214 512 320 512C361.5 512 399.9 498.9 431.2 476.5zM476.5 431.2C498.9 399.8 512 361.4 512 320C512 214 426 128 320 128C278.5 128 240.1 141.1 208.8 163.5L476.5 431.2zM64 320C64 178.6 178.6 64 320 64C461.4 64 576 178.6 576 320C576 461.4 461.4 576 320 576C178.6 576 64 461.4 64 320z" />
+            </svg>
             Anda <strong>Mengtakedown</strong> Artikel ini telah.
         </div>
     <?php } else { ?>
         <?php
         if ($row['status'] === 'draft') { ?>
             <div class="alert alert-warning" role="alert">
-                <i class="fa-solid fa-triangle-exclamation me-2"></i>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" style="width: 25px;">
+                    <path d="M192 64C156.7 64 128 92.7 128 128L128 512C128 547.3 156.7 576 192 576L448 576C483.3 576 512 547.3 512 512L512 234.5C512 217.5 505.3 201.2 493.3 189.2L386.7 82.7C374.7 70.7 358.5 64 341.5 64L192 64zM453.5 240L360 240C346.7 240 336 229.3 336 216L336 122.5L453.5 240z" />
+                </svg>
                 Artikel ini masih dalam status <strong>Draft</strong>. Hanya Author dan Admin yang dapat melihatnya.
             </div>
         <?php }
@@ -193,7 +197,9 @@ if (isset($_POST['untakedown']) && $row_admin['is_admin'] === "YES") {
         <?php
         if ($row['is_takedown'] === 'YES') { ?>
             <div class="alert alert-danger" role="alert">
-                <i class="fa-solid fa-triangle-exclamation me-2"></i>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" style="width: 25px;">
+                    <path d="M431.2 476.5L163.5 208.8C141.1 240.2 128 278.6 128 320C128 426 214 512 320 512C361.5 512 399.9 498.9 431.2 476.5zM476.5 431.2C498.9 399.8 512 361.4 512 320C512 214 426 128 320 128C278.5 128 240.1 141.1 208.8 163.5L476.5 431.2zM64 320C64 178.6 178.6 64 320 64C461.4 64 576 178.6 576 320C576 461.4 461.4 576 320 576C178.6 576 64 461.4 64 320z" />
+                </svg>
                 Artikel ini telah <strong>Ditakedown</strong> oleh admin.
             </div>
         <?php }
@@ -218,7 +224,7 @@ if (isset($_POST['untakedown']) && $row_admin['is_admin'] === "YES") {
     <!-- Cover Image -->
     <div style="width:600px; aspect-ratio:16/10; overflow:hidden; border-radius:8px;">
         <img src="../assets/image/thumbnail/<?= $row['thumbnail'] ?>"
-            style="width:100%; height:100%; object-fit:cover;">
+            style="width:100%; height:100%; object-fit:contain;">
     </div>
     <hr>
 
@@ -231,20 +237,20 @@ if (isset($_POST['untakedown']) && $row_admin['is_admin'] === "YES") {
         </div>
         <?php
         if ($row_admin['is_admin'] === "YES") { ?>
-                <form  method="POST">
-                    <?php
-                    if ($row['is_takedown'] === 'YES') { ?>
+            <form method="POST">
+                <?php
+                if ($row['is_takedown'] === 'YES') { ?>
 
-                        <button class="btn btn-sm btn-outline-danger" name="untakedown">Untakedown</button>
+                    <button class="btn btn-sm btn-outline-danger" name="untakedown">Untakedown</button>
 
-                    <?php } else { ?>
-                        <button class="btn btn-sm btn-outline-danger" name="takedown">Takedown</button>
-                    <?php }
-                    ?>
-                </form>
-            <?php }
-            ?>
-            <small class="text-muted"><?php echo $row['views']; ?> views</small>
+                <?php } else { ?>
+                    <button class="btn btn-sm btn-outline-danger" name="takedown">Takedown</button>
+                <?php }
+                ?>
+            </form>
+        <?php }
+        ?>
+        <small class="text-muted"><?php echo $row['views']; ?> views</small>
     </div>
     <hr>
     <!-- Content -->
